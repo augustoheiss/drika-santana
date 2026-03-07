@@ -9,8 +9,8 @@ const servicesList = [
     icon: <Scissors className="w-6 h-6 text-yellow-500" />
   },
   {
-    title: 'Resgate Ancestral (Dry Cut)',
-    description: 'Especialidade em crespos e cacheados. Corte a seco para respeitar a curvatura natural e o caimento real dos fios.',
+    title: 'Crespos & Cacheados (Dry Cut)',
+    description: 'Respeito à estrutura espiralada e ao fator de encolhimento. Lavamos e secamos para avaliar o caimento natural, esculpindo o corte a seco para valorizar a sua curvatura.',
     icon: <User className="w-6 h-6 text-yellow-500" />
   },
   {

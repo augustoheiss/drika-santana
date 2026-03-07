@@ -79,7 +79,7 @@ export default function BookingCalendar() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-5xl font-serif text-slate-50 mb-4">
-            Reserve o seu <span className="text-yellow-500 italic">Santuário</span>
+            Reserve o seu <span className="text-yellow-500 italic">Espaço de Embelezamento</span>
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             Selecione uma data para iniciar a sua consultoria diagnóstica. Nossa equipe confirmará os detalhes via WhatsApp.
