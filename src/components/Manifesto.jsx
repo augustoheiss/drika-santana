@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import fotoDrika from '../assets/drikahair-02.jpg';
 
 export default function Manifesto() {
   return (
@@ -16,7 +17,7 @@ export default function Manifesto() {
         >
           <div className="absolute inset-0 bg-yellow-500/10 transform translate-x-4 translate-y-4 border border-yellow-500/30"></div>
           <img 
-            src="/drikahair-02.jpg" 
+            src={fotoDrika} 
             alt="Adriana Santana - Especialista em Visagismo" 
             className="relative z-10 w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl border border-zinc-800"
           />
