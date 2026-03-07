@@ -102,7 +102,7 @@ export default function BookingCalendar() {
     window.open(`https://wa.me/5511978466027?text=${textoCodificado}`, '_blank');
   };
   return (
-    <section className="py-24 bg-zinc-950 px-6 md:px-12 border-t border-zinc-900">
+    <section id="agendamento" className="py-24 bg-zinc-950 px-6 md:px-12 border-t border-zinc-900">
       <div className="max-w-5xl mx-auto">
         
         <div className="text-center mb-12">
