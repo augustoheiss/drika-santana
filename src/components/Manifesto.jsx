@@ -19,7 +19,7 @@ export default function Manifesto() {
           <img 
             src={fotoDrika} 
             alt="Adriana Santana - Especialista em Visagismo" 
-            className="relative z-10 w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl border border-zinc-800"
+            className="relative z-10 w-full h-auto object-cover grayscale-0 md:grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl border border-zinc-800"
           />
           <div className="absolute -bottom-6 -right-6 bg-zinc-900 border border-yellow-500/30 p-4 z-20 shadow-xl">
             <p className="font-serif text-yellow-500 text-sm tracking-widest uppercase">Adriana Santana</p>
