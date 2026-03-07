@@ -1,48 +1,53 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, ArrowRight, ArrowLeft, Send, ClipboardType, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, ArrowRight, ArrowLeft, Send, ClipboardType, ChevronLeft, ChevronRight, CheckSquare, Square, Info } from 'lucide-react';
 
 export default function BookingCalendar() {
   const [step, setStep] = useState(1);
+  const [selectedServices, setSelectedServices] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
-  const [customTime, setCustomTime] = useState(''); // Novo estado para o horário personalizado
+  const [customTime, setCustomTime] = useState('');
   
   const [formData, setFormData] = useState({
     nome: '',
     idade: '',
-    historico: '',
     alergias: '',
-    objetivo: ''
+    historicoCabelo: '',
+    historicoPele: '',
+    historicoUnhas: '',
+    autorizaImagem: 'Não informado'
   });
 
-  // Horários com a opção "Outro" no final
-  const availableTimes = [
-    '08:00', '09:00', '10:00', '11:00', '12:00', 
-    '13:00', '14:00', '15:00', '16:00', '17:00', 'Outro'
+  const availableServices = [
+    { id: 'corte', label: 'Corte & Visagismo', category: 'cabelo' },
+    { id: 'drycut', label: 'Crespos & Cacheados (Dry Cut)', category: 'cabelo' },
+    { id: 'colorimetria', label: 'Mechas & Colorimetria', category: 'cabelo' },
+    { id: 'tratamento', label: 'Tratamentos & Cronograma', category: 'cabelo' },
+    { id: 'penteado', label: 'Penteado', category: 'cabelo' },
+    { id: 'sobrancelha', label: 'Design de Sobrancelhas', category: 'rosto' },
+    { id: 'barba', label: 'Barbearia Clássica', category: 'rosto' },
+    { id: 'unhas', label: 'Manicure Premium', category: 'unhas' }
   ];
 
-  const meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-
+  const availableTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', 'Outro'];
+  const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-  const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-    setSelectedDate(null);
-    setSelectedTime('');
-    setCustomTime('');
+  // Lógica de Categorias Dinâmicas
+  const hasCabelo = selectedServices.some(id => availableServices.find(s => s.id === id)?.category === 'cabelo');
+  const hasRosto = selectedServices.some(id => availableServices.find(s => s.id === id)?.category === 'rosto');
+  const hasUnhas = selectedServices.some(id => availableServices.find(s => s.id === id)?.category === 'unhas');
+
+  const toggleService = (id) => {
+    setSelectedServices(prev => 
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
   };
 
-  const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-    setSelectedDate(null);
-    setSelectedTime('');
-    setCustomTime('');
-  };
+  const prevMonth = () => { setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)); setSelectedDate(null); setSelectedTime(''); setCustomTime(''); };
+  const nextMonth = () => { setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)); setSelectedDate(null); setSelectedTime(''); setCustomTime(''); };
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -61,35 +66,36 @@ export default function BookingCalendar() {
   };
 
   const handleDayClick = (day) => {
-    const clickedDate = new Date(year, month, day);
-    setSelectedDate(clickedDate);
+    setSelectedDate(new Date(year, month, day));
     setSelectedTime('');
     setCustomTime('');
   };
 
-  const handleNextStep = () => {
-    // Só avança se escolheu um horário fixo OU se escolheu 'Outro' e digitou qual é
-    if (selectedDate && (selectedTime !== 'Outro' || (selectedTime === 'Outro' && customTime))) {
-      setStep(2);
-    }
-  };
+  const handleNextStep = () => setStep(prev => prev + 1);
+  const handlePrevStep = () => setStep(prev => prev - 1);
 
-  const handlePrevStep = () => setStep(1);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
     const dataFormatada = formatDate(selectedDate);
     const horarioFinal = selectedTime === 'Outro' ? customTime : selectedTime;
-
-    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Data desejada:* ${dataFormatada} às ${horarioFinal}%0A%0A*-- Ficha de Avaliação Prévia --*%0A*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Histórico Químico:* ${formData.historico}%0A*Alergias:* ${formData.alergias}%0A*Objetivo:* ${formData.objetivo}%0A%0AOlá Drika, podemos confirmar este horário?`;
     
-    const url = `https://wa.me/5511978466027?text=${texto}`;
-    window.open(url, '_blank');
+    // Pega os nomes bonitos dos serviços escolhidos
+    const servicosEscolhidos = selectedServices.map(id => availableServices.find(s => s.id === id).label).join(', ');
+
+    let fichaDinamica = `*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Alergias:* ${formData.alergias}`;
+    
+    if (hasCabelo) fichaDinamica += `%0A*Histórico Capilar (2 anos):* ${formData.historicoCabelo}`;
+    if (hasRosto) fichaDinamica += `%0A*Uso de Ácidos/Micropigmentação:* ${formData.historicoPele}`;
+    if (hasUnhas) fichaDinamica += `%0A*Sensibilidade/Micose:* ${formData.historicoUnhas}`;
+
+    fichaDinamica += `%0A*Autoriza uso de imagem:* ${formData.autorizaImagem}`;
+
+    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Serviço(s):* ${servicosEscolhidos}%0A*Data desejada:* ${dataFormatada} às ${horarioFinal}%0A%0A*-- Ficha de Anamnese --*%0A${fichaDinamica}%0A%0A_Estou ciente sobre a política do sinal para reserva do horário._%0A%0AOlá Drika, podemos confirmar este agendamento?`;
+    
+    window.open(`https://wa.me/5511978466027?text=${texto}`, '_blank');
   };
 
   return (
@@ -105,76 +111,76 @@ export default function BookingCalendar() {
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden min-h-[500px]">
           
-          <div className="flex items-center justify-center gap-4 mb-8 max-w-md mx-auto">
+          {/* Barra de Progresso com 3 Passos */}
+          <div className="flex items-center justify-center gap-4 mb-8 max-w-lg mx-auto">
             <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
             <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+            <div className={`h-2 flex-1 rounded-full ${step >= 3 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
           </div>
 
           <AnimatePresence mode="wait">
             
+            {/* PASSO 1: ESCOLHA DE SERVIÇOS */}
             {step === 1 && (
-              <motion.div 
-                key="step1"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-12"
-              >
+              <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <h3 className="text-2xl font-serif text-slate-50 mb-6 text-center">1. O que vamos transformar hoje?</h3>
+                <p className="text-zinc-400 text-center text-sm mb-8">Selecione um ou mais serviços abaixo.</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 max-w-4xl mx-auto">
+                  {availableServices.map((service) => (
+                    <button
+                      key={service.id}
+                      onClick={() => toggleService(service.id)}
+                      className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${
+                        selectedServices.includes(service.id) 
+                          ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500' 
+                          : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-zinc-600'
+                      }`}
+                    >
+                      {selectedServices.includes(service.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5 text-zinc-600" />}
+                      <span className="text-sm font-medium">{service.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex justify-center">
+                  <button onClick={handleNextStep} disabled={selectedServices.length === 0} className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center gap-3 transition-colors">
+                    Próximo Passo <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* PASSO 2: CALENDÁRIO */}
+            {step === 2 && (
+              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-serif text-slate-50 capitalize">
-                      {meses[month]} {year}
-                    </h3>
+                    <h3 className="text-xl font-serif text-slate-50 capitalize">{meses[month]} {year}</h3>
                     <div className="flex gap-2">
-                      <button onClick={prevMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500 hover:border-yellow-500 transition-colors">
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                      <button onClick={nextMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500 hover:border-yellow-500 transition-colors">
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
+                      <button onClick={prevMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500"><ChevronLeft className="w-5 h-5" /></button>
+                      <button onClick={nextMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500"><ChevronRight className="w-5 h-5" /></button>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-7 gap-2 text-center mb-2">
-                    {diasSemana.map(dia => (
-                      <div key={dia} className="text-xs font-bold text-zinc-500 uppercase">{dia}</div>
-                    ))}
+                    {diasSemana.map(dia => <div key={dia} className="text-xs font-bold text-zinc-500 uppercase">{dia}</div>)}
                   </div>
-
                   <div className="grid grid-cols-7 gap-2 text-center">
-                    {blanks.map((_, i) => (
-                      <div key={`blank-${i}`} className="p-3"></div>
-                    ))}
-                    
+                    {blanks.map((_, i) => <div key={`blank-${i}`} className="p-3"></div>)}
                     {days.map(day => {
                       const dateObj = new Date(year, month, day);
                       const isPast = dateObj < today;
                       const isClosed = dateObj.getDay() === 0; 
                       const isDisabled = isPast || isClosed;
-                      
-                      const isSelected = selectedDate && 
-                        selectedDate.getDate() === day && 
-                        selectedDate.getMonth() === month && 
-                        selectedDate.getFullYear() === year;
+                      const isSelected = selectedDate && selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
 
                       return (
-                        <button
-                          key={day}
-                          onClick={() => !isDisabled && handleDayClick(day)}
-                          disabled={isDisabled}
-                          className={`
-                            p-2 rounded-lg text-sm font-medium transition-all w-full
-                            ${isDisabled ? 'text-zinc-700 cursor-not-allowed' : 'hover:border-yellow-500/50 cursor-pointer'}
-                            ${isSelected ? 'bg-yellow-500 text-zinc-950 font-bold shadow-lg shadow-yellow-500/20' : (!isDisabled ? 'bg-zinc-950 border border-zinc-800 text-slate-300' : 'bg-transparent')}
-                          `}
-                        >
+                        <button key={day} onClick={() => !isDisabled && handleDayClick(day)} disabled={isDisabled} className={`p-2 rounded-lg text-sm font-medium w-full ${isDisabled ? 'text-zinc-700 cursor-not-allowed' : 'hover:border-yellow-500/50'} ${isSelected ? 'bg-yellow-500 text-zinc-950 font-bold' : (!isDisabled ? 'bg-zinc-950 border border-zinc-800 text-slate-300' : 'bg-transparent')}`}>
                           {day}
                         </button>
                       );
                     })}
                   </div>
-                  <p className="text-xs text-zinc-500 mt-4 text-center">* Dias indisponíveis aparecem apagados. Fechado aos domingos.</p>
                 </div>
 
                 <div className="flex flex-col">
@@ -182,115 +188,97 @@ export default function BookingCalendar() {
                     <Clock className="w-6 h-6 text-yellow-500" />
                     <h3 className="text-xl font-serif text-slate-50">Horários Disponíveis</h3>
                   </div>
-
                   {!selectedDate ? (
-                    <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center text-zinc-500">
-                      <p>Por favor, selecione uma data no calendário ao lado para ver os horários.</p>
-                    </div>
+                    <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center text-zinc-500"><p>Selecione uma data ao lado.</p></div>
                   ) : (
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-3">
                         {availableTimes.map((time) => (
-                          <button
-                            key={time}
-                            onClick={() => setSelectedTime(time)}
-                            className={`p-3 rounded-lg border text-sm transition-all ${
-                              selectedTime === time 
-                                ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold shadow-lg shadow-yellow-500/20' 
-                                : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50 hover:bg-zinc-900'
-                            }`}
-                          >
-                            {time === 'Outro' ? 'Outro' : time}
+                          <button key={time} onClick={() => setSelectedTime(time)} className={`p-3 rounded-lg border text-sm ${selectedTime === time ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold' : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50'}`}>
+                            {time}
                           </button>
                         ))}
                       </div>
-
-                      <AnimatePresence>
-                        {selectedTime === 'Outro' && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="bg-zinc-950 border border-yellow-500/30 p-4 rounded-lg mt-2">
-                              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Qual horário você prefere?</label>
-                              <input 
-                                type="time" 
-                                value={customTime}
-                                onChange={(e) => setCustomTime(e.target.value)}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:outline-none focus:border-yellow-500 transition-colors color-scheme-dark"
-                              />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      {selectedTime === 'Outro' && (
+                        <div className="bg-zinc-950 border border-yellow-500/30 p-4 rounded-lg mt-2">
+                          <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Qual horário prefere?</label>
+                          <input type="time" value={customTime} onChange={(e) => setCustomTime(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 color-scheme-dark" />
+                        </div>
+                      )}
                     </div>
                   )}
-
-                  <div className="mt-auto pt-8 flex justify-end">
-                    <button 
-                      onClick={handleNextStep}
-                      disabled={!selectedDate || !selectedTime || (selectedTime === 'Outro' && !customTime)}
-                      className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center justify-center gap-3 transition-colors"
-                    >
-                      Próximo Passo
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
+                  <div className="mt-auto pt-8 flex justify-between">
+                    <button onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2"><ArrowLeft className="w-4 h-4" /> Voltar</button>
+                    <button onClick={handleNextStep} disabled={!selectedDate || !selectedTime || (selectedTime === 'Outro' && !customTime)} className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold py-3 px-6 rounded-lg flex items-center gap-2">Próximo Passo <ArrowRight className="w-5 h-5" /></button>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {step === 2 && (
-              <motion.div 
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 border-b border-zinc-800 pb-4 gap-4">
-                  <div className="flex items-center gap-3">
-                    <ClipboardType className="w-6 h-6 text-yellow-500" />
-                    <h3 className="text-xl font-serif text-slate-50">2. Ficha de Avaliação Prévia</h3>
-                  </div>
-                  <div className="text-xs text-yellow-500 font-bold bg-yellow-500/10 px-4 py-2 rounded-full border border-yellow-500/20">
-                    {formatDate(selectedDate)} às {selectedTime === 'Outro' ? customTime : selectedTime}
+            {/* PASSO 3: FICHA DE ANAMNESE DINÂMICA */}
+            {step === 3 && (
+              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
+                
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6 flex items-start gap-4">
+                  <Info className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="text-yellow-500 font-bold mb-1">Garantia de Agendamento</h4>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      Para confirmar a sua reserva na agenda, solicitamos um pequeno **sinal financeiro** no momento do contato. Este valor será **integralmente abatido** do total no dia do seu procedimento.
+                    </p>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  <h3 className="text-xl font-serif text-slate-50 border-b border-zinc-800 pb-2 mb-4">Dados Principais</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <input type="text" name="nome" required onChange={handleChange} placeholder="Seu Nome Completo" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <input type="number" name="idade" required onChange={handleChange} placeholder="Sua Idade" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
-                    </div>
+                    <input type="text" name="nome" required onChange={handleChange} placeholder="Seu Nome Completo" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                    <input type="number" name="idade" required onChange={handleChange} placeholder="Sua Idade" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
                   </div>
+                  <input type="text" name="alergias" required onChange={handleChange} placeholder="Possui alguma alergia? (Cosméticos, amônia, esmaltes...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
 
-                  <div>
-                    <textarea name="historico" rows="2" required onChange={handleChange} placeholder="Histórico Químico (Últimos 2 anos. Ex: Progressiva, tintura...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none"></textarea>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* CAMPOS DINÂMICOS */}
+                  {(hasCabelo || hasRosto || hasUnhas) && (
+                    <h3 className="text-xl font-serif text-slate-50 border-b border-zinc-800 pb-2 mt-8 mb-4">Ficha Clínica Específica</h3>
+                  )}
+                  
+                  {hasCabelo && (
                     <div>
-                      <input type="text" name="alergias" required onChange={handleChange} placeholder="Possui alergias? Quais?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Histórico Capilar</label>
+                      <textarea name="historicoCabelo" rows="2" required onChange={handleChange} placeholder="Químicas feitas nos últimos 2 anos (Progressiva, tintura, relaxamento...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500"></textarea>
                     </div>
+                  )}
+
+                  {hasRosto && (
                     <div>
-                      <input type="text" name="objetivo" required onChange={handleChange} placeholder="Qual o seu objetivo com o cabelo?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Pele & Rosto</label>
+                      <input type="text" name="historicoPele" required onChange={handleChange} placeholder="Usa ácidos no rosto ou possui micropigmentação?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                    </div>
+                  )}
+
+                  {hasUnhas && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Saúde das Unhas</label>
+                      <input type="text" name="historicoUnhas" required onChange={handleChange} placeholder="Alguma sensibilidade ou histórico de micose?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                    </div>
+                  )}
+
+                  <div className="mt-6 pt-6 border-t border-zinc-800">
+                    <label className="block text-sm font-bold text-slate-300 mb-3">Você autoriza o uso da sua imagem para nosso portfólio no Instagram?</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200">
+                        <input type="radio" name="autorizaImagem" value="Sim" onChange={handleChange} className="accent-yellow-500" required /> Sim
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200">
+                        <input type="radio" name="autorizaImagem" value="Não" onChange={handleChange} className="accent-yellow-500" required /> Não
+                      </label>
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4">
-                    <button type="button" onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2 transition-colors w-full sm:w-auto justify-center">
-                      <ArrowLeft className="w-4 h-4" /> Voltar ao Calendário
-                    </button>
-                    
-                    <button type="submit" className="bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center justify-center gap-3 transition-colors w-full sm:w-auto shadow-lg shadow-yellow-500/20">
-                      Enviar Ficha e Agendar
-                      <Send className="w-5 h-5" />
+                    <button type="button" onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2"><ArrowLeft className="w-4 h-4" /> Voltar</button>
+                    <button type="submit" className="bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold uppercase py-3 px-8 rounded-lg flex items-center justify-center gap-3 w-full sm:w-auto">
+                      Enviar Ficha e Agendar <Send className="w-5 h-5" />
                     </button>
                   </div>
                 </form>
