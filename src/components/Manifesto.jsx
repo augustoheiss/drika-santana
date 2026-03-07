@@ -18,16 +18,16 @@ export default function Manifesto() {
           <div className="absolute inset-0 bg-yellow-500/10 transform translate-x-4 translate-y-4 border border-yellow-500/30"></div>
           <img 
             src={fotoDrika} 
-            alt="Adriana Santana - Especialista em Visagismo" 
+            alt="Adriana Santana - Studio Premium" 
             className="relative z-10 w-full h-auto object-cover grayscale-0 md:grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl border border-zinc-800"
           />
           <div className="absolute -bottom-6 -right-6 bg-zinc-900 border border-yellow-500/30 p-4 z-20 shadow-xl">
             <p className="font-serif text-yellow-500 text-sm tracking-widest uppercase">Adriana Santana</p>
-            <p className="text-slate-400 text-xs">Arquiteta de Imagem</p>
+            <p className="text-slate-400 text-xs">Espaço de Embelezamento</p>
           </div>
         </motion.div>
 
-        {/* Lado Direito: O Texto dos PDFs */}
+        {/* Lado Direito: O Novo Texto */}
         <motion.div 
           initial={{ opacity: 0, x: 30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -42,13 +42,13 @@ export default function Manifesto() {
           
           <div className="space-y-6 text-slate-300 font-light leading-relaxed">
             <p>
-              A beleza não é mais uma linha de montagem para mascarar imperfeições. O mercado de alto padrão exige o fim do "achismo" e do empirismo. O verdadeiro luxo contemporâneo exige <strong>hiper-personalização, saúde biômica e liberdade estética</strong>.
+              A beleza não é uma linha de montagem para mascarar imperfeições. O verdadeiro luxo contemporâneo exige <strong>personalização, respeito à saúde dos fios e liberdade estética</strong>.
             </p>
             <p>
-              A sua imagem está sendo construída com base em biologia molecular e geometria facial, ou está apenas sendo copiada? Como <strong>Engenheira Visual e Consultora de Imagem</strong>, minha missão é unir o rigor técnico das academias globais à proporção áurea do seu rosto.
+              A sua imagem está sendo construída com base no que realmente funciona para o seu dia a dia, ou está apenas seguindo tendências vazias? Através do <strong>Visagismo Prático</strong>, nossa missão é adequar o design do corte e a cor à sua rotina, formato de rosto e estilo de vida.
             </p>
             <p className="border-l-2 border-yellow-500 pl-4 italic text-slate-400">
-              "Um santuário de luxo e acolhimento na Zona Leste de São Paulo. Você não entrega sua imagem ao acaso, entrega à ciência e à arte."
+              "Um Studio Premium na Zona Leste de São Paulo. Você não entrega sua imagem ao acaso, entrega a profissionais focados na sua realidade e bem-estar."
             </p>
           </div>
         </motion.div>

@@ -5,6 +5,7 @@ import Services from './components/Services'
 import Media from './components/Media' // <-- Nova importação aqui
 import BookingCalendar from './components/BookingCalendar'
 import Footer from './components/Footer'
+import Anamnese from './components/Anamnese'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Manifesto />
       <Services />
       <Media /> 
+      <Anamnese />
       <BookingCalendar />
       <Footer />
     </main>
