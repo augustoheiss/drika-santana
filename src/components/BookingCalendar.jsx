@@ -85,19 +85,22 @@ export default function BookingCalendar() {
     // Pega os nomes bonitos dos serviços escolhidos
     const servicosEscolhidos = selectedServices.map(id => availableServices.find(s => s.id === id).label).join(', ');
 
-    let fichaDinamica = `*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Alergias:* ${formData.alergias}`;
+    // Usamos \n (quebra de linha real) em vez de %0A para o encode processar tudo certinho
+    let fichaDinamica = `*Nome:* ${formData.nome}\n*Idade:* ${formData.idade}\n*Alergias:* ${formData.alergias}`;
     
-    if (hasCabelo) fichaDinamica += `%0A*Histórico Capilar (2 anos):* ${formData.historicoCabelo}`;
-    if (hasRosto) fichaDinamica += `%0A*Uso de Ácidos/Micropigmentação:* ${formData.historicoPele}`;
-    if (hasUnhas) fichaDinamica += `%0A*Sensibilidade/Micose:* ${formData.historicoUnhas}`;
+    if (hasCabelo) fichaDinamica += `\n*Histórico Capilar (2 anos):* ${formData.historicoCabelo}`;
+    if (hasRosto) fichaDinamica += `\n*Uso de Ácidos/Micropigmentação:* ${formData.historicoPele}`;
+    if (hasUnhas) fichaDinamica += `\n*Sensibilidade/Micose:* ${formData.historicoUnhas}`;
 
-    fichaDinamica += `%0A*Autoriza uso de imagem:* ${formData.autorizaImagem}`;
+    fichaDinamica += `\n*Autoriza uso de imagem:* ${formData.autorizaImagem}`;
 
-    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Serviço(s):* ${servicosEscolhidos}%0A*Data desejada:* ${dataFormatada} às ${horarioFinal}%0A%0A*-- Ficha de Anamnese --*%0A${fichaDinamica}%0A%0A_Estou ciente sobre a política do sinal para reserva do horário._%0A%0AOlá Drika, podemos confirmar este agendamento?`;
+    const textoBase = `*Solicitação de Agendamento - Drika Studio*\n\n*Serviço(s):* ${servicosEscolhidos}\n*Data desejada:* ${dataFormatada} às ${horarioFinal}\n\n*-- Ficha de Anamnese --*\n${fichaDinamica}\n\n_Estou ciente sobre a política do sinal para reserva do horário._\n\nOlá Drika, podemos confirmar este agendamento?`;
     
-    window.open(`https://wa.me/5511978466027?text=${texto}`, '_blank');
+    // O escudo protetor que traduz tudo para o WhatsApp não cortar nada
+    const textoCodificado = encodeURIComponent(textoBase);
+    
+    window.open(`https://wa.me/5511978466027?text=${textoCodificado}`, '_blank');
   };
-
   return (
     <section className="py-24 bg-zinc-950 px-6 md:px-12 border-t border-zinc-900">
       <div className="max-w-5xl mx-auto">
