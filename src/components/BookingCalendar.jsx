@@ -1,182 +1,198 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, MessageCircle, ChevronLeft } from 'lucide-react';
-
-const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
-const AVAILABLE_TIMES = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-const PHONE_NUMBER = "5511987466027"; // Número da Drika
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Clock, ArrowRight, ArrowLeft, Send, ClipboardType } from 'lucide-react';
 
 export default function BookingCalendar() {
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [step, setStep] = useState(1);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  
+  const [formData, setFormData] = useState({
+    nome: '',
+    idade: '',
+    historico: '',
+    alergias: '',
+    objetivo: ''
+  });
 
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth();
-  const currentDay = today.getDate();
+  // Horários de exemplo (Terça a Sábado)
+  const availableTimes = ['09:00', '10:30', '13:00', '14:30', '16:00', '17:30'];
 
-  // --- Funções do WhatsApp ---
-  const handleTimeClick = (time) => {
-    const text = `Olá Drika! Gostaria de agendar uma consultoria no dia ${selectedDay} de ${MONTHS[selectedMonth]} às ${time}. Podemos confirmar?`;
-    window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
+  const handleNextStep = () => {
+    if (selectedDate && selectedTime) {
+      setStep(2);
+    }
   };
 
-  const handleOtherTimeClick = () => {
-    const text = `Olá Drika! Gostaria de agendar uma consultoria no dia ${selectedDay} de ${MONTHS[selectedMonth]}, mas em um horário diferente dos listados. Podemos verificar a disponibilidade?`;
-    window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
+  const handlePrevStep = () => {
+    setStep(1);
   };
 
-  // --- Geração do Calendário Seguro ---
-  const getDaysInMonth = (month) => new Date(currentYear, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (month) => new Date(currentYear, month, 1).getDay();
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const renderDays = () => {
-    const daysInMonth = getDaysInMonth(selectedMonth);
-    const firstDay = getFirstDayOfMonth(selectedMonth);
-    const days = [];
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Formata a data para o padrão brasileiro (DD/MM/YYYY)
+    const dataFormatada = selectedDate.split('-').reverse().join('/');
 
-    // Espaços vazios para alinhar o primeiro dia do mês
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2"></div>);
+    // Monta a super mensagem pro WhatsApp
+    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Data desejada:* ${dataFormatada} às ${selectedTime}%0A%0A*-- Ficha de Avaliação Prévia --*%0A*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Histórico Químico:* ${formData.historico}%0A*Alergias:* ${formData.alergias}%0A*Objetivo:* ${formData.objetivo}%0A%0AOlá Drika, podemos confirmar este horário?`;
+    
+    const url = `https://wa.me/5511978466027?text=${texto}`;
+    window.open(url, '_blank');
+  };
+
+  // Impede que a cliente selecione domingos (0) e segundas (1) no calendário do navegador
+  const handleDateChange = (e) => {
+    const date = new Date(e.target.value);
+    const day = date.getUTCDay();
+    if (day === 0 || day === 1) {
+      alert('O Studio é fechado aos Domingos e Segundas para estudos. Por favor, escolha outro dia.');
+      setSelectedDate('');
+    } else {
+      setSelectedDate(e.target.value);
     }
-
-    // Dias do mês
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isPast = selectedMonth === currentMonth && day < currentDay;
-      const isSelected = selectedDay === day;
-
-      days.push(
-        <button
-          key={day}
-          disabled={isPast}
-          onClick={() => setSelectedDay(day)}
-          className={`h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center text-sm transition-all duration-300 ${
-            isPast 
-              ? 'text-zinc-700 cursor-not-allowed opacity-50' 
-              : isSelected 
-                ? 'bg-yellow-500 text-zinc-950 font-bold scale-110 shadow-[0_0_15px_rgba(234,179,8,0.3)]' 
-                : 'text-slate-300 hover:bg-zinc-800 hover:text-yellow-500'
-          }`}
-        >
-          {day}
-        </button>
-      );
-    }
-    return days;
   };
 
   return (
-    <section id="agendamento" className="py-24 bg-zinc-900 border-t border-zinc-800 px-6 md:px-12">
+    <section className="py-24 bg-zinc-950 px-6 md:px-12 border-t border-zinc-900">
       <div className="max-w-4xl mx-auto">
         
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-serif text-slate-50 mb-4">
-            Reserve o seu <span className="text-yellow-500 italic">Espaço de Embelezamento</span>
+            Inicie seu <span className="text-yellow-500 italic">Projeto de Imagem</span>
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Selecione uma data para iniciar a sua consultoria diagnóstica. Nossa equipe confirmará os detalhes via WhatsApp.
-          </p>
-        </motion.div>
+          <p className="text-slate-400">Atendimento exclusivo mediante agendamento e avaliação diagnóstica.</p>
+        </div>
 
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
           
-          {/* PASSO 1: Escolher o Mês */}
-          {selectedMonth === null && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div className="flex items-center gap-3 mb-6 justify-center">
-                <CalendarIcon className="text-yellow-500 w-6 h-6" />
-                <h3 className="text-xl text-slate-50 font-serif">Selecione o Mês ({currentYear})</h3>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {MONTHS.map((month, index) => {
-                  const isPastMonth = index < currentMonth;
-                  return (
-                    <button
-                      key={month}
-                      disabled={isPastMonth}
-                      onClick={() => setSelectedMonth(index)}
-                      className={`p-4 rounded-xl border transition-all duration-300 ${
-                        isPastMonth 
-                          ? 'border-zinc-800 text-zinc-600 bg-zinc-950 cursor-not-allowed' 
-                          : 'border-zinc-700 text-slate-300 hover:border-yellow-500 hover:text-yellow-500 hover:bg-zinc-900'
-                      }`}
-                    >
-                      {month}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
+          {/* Barra de Progresso */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+          </div>
 
-          {/* PASSO 2: Escolher o Dia */}
-          {selectedMonth !== null && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <button 
-                onClick={() => { setSelectedMonth(null); setSelectedDay(null); }}
-                className="flex items-center text-slate-400 hover:text-yellow-500 transition-colors mb-6 text-sm"
+          <AnimatePresence mode="wait">
+            {/* PASSO 1: DATA E HORÁRIO */}
+            {step === 1 && (
+              <motion.div 
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
               >
-                <ChevronLeft className="w-4 h-4 mr-1" /> Voltar aos meses
-              </button>
-              
-              <div className="flex items-center gap-3 mb-6 justify-center">
-                <CalendarIcon className="text-yellow-500 w-6 h-6" />
-                <h3 className="text-xl text-slate-50 font-serif">{MONTHS[selectedMonth]} {currentYear}</h3>
-              </div>
+                <div className="flex items-center gap-3 mb-6 border-b border-zinc-800 pb-4">
+                  <Calendar className="w-6 h-6 text-yellow-500" />
+                  <h3 className="text-xl font-serif text-slate-50">1. Escolha a Data e Horário</h3>
+                </div>
 
-              <div className="grid grid-cols-7 gap-2 mb-2 text-center">
-                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                  <div key={day} className="text-xs text-yellow-500/70 font-medium">{day}</div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-7 gap-2 place-items-center mb-10">
-                {renderDays()}
-              </div>
-
-              {/* PASSO 3: Escolher o Horário (Aparece após escolher o dia) */}
-              {selectedDay !== null && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }}
-                  className="pt-8 border-t border-zinc-800"
-                >
-                  <div className="flex items-center gap-3 mb-6 justify-center">
-                    <Clock className="text-yellow-500 w-6 h-6" />
-                    <h3 className="text-xl text-slate-50 font-serif">Horários Disponíveis</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {AVAILABLE_TIMES.map(time => (
-                      <button
-                        key={time}
-                        onClick={() => handleTimeClick(time)}
-                        className="flex items-center justify-center gap-2 p-3 rounded-lg border border-zinc-700 text-slate-300 hover:bg-yellow-500 hover:text-zinc-950 hover:border-yellow-500 transition-all font-medium"
-                      >
-                        {time}
-                      </button>
-                    ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Data Desejada</label>
+                    <input 
+                      type="date" 
+                      value={selectedDate}
+                      onChange={handleDateChange}
+                      min={new Date().toISOString().split('T')[0]} // Não deixa escolher dias no passado
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-4 text-slate-50 focus:outline-none focus:border-yellow-500 color-scheme-dark"
+                    />
+                    <p className="text-xs text-zinc-500 mt-2">* Fechado aos domingos e segundas.</p>
                   </div>
 
-                  <button
-                    onClick={handleOtherTimeClick}
-                    className="w-full mt-4 flex items-center justify-center gap-2 p-4 rounded-lg bg-zinc-900 border border-zinc-700 text-slate-300 hover:bg-zinc-800 transition-all"
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Horários Disponíveis</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {availableTimes.map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => setSelectedTime(time)}
+                          className={`p-3 rounded-lg border text-sm transition-all ${
+                            selectedTime === time 
+                              ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold' 
+                              : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50'
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button 
+                    onClick={handleNextStep}
+                    disabled={!selectedDate || !selectedTime}
+                    className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center gap-3 transition-colors"
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    Solicitar outro horário via WhatsApp
+                    Próximo Passo
+                    <ArrowRight className="w-5 h-5" />
                   </button>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* PASSO 2: FICHA DE ANAMNESE */}
+            {step === 2 && (
+              <motion.div 
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+                  <div className="flex items-center gap-3">
+                    <ClipboardType className="w-6 h-6 text-yellow-500" />
+                    <h3 className="text-xl font-serif text-slate-50">2. Ficha de Avaliação Prévia</h3>
+                  </div>
+                  <div className="text-xs text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded-full">
+                    {selectedDate.split('-').reverse().join('/')} às {selectedTime}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <input type="text" name="nome" required onChange={handleChange} placeholder="Seu Nome Completo" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <input type="number" name="idade" required onChange={handleChange} placeholder="Sua Idade" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <textarea name="historico" rows="2" required onChange={handleChange} placeholder="Histórico Químico (Últimos 2 anos. Ex: Progressiva, tintura...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none"></textarea>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <input type="text" name="alergias" required onChange={handleChange} placeholder="Possui alergias? Quais?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <input type="text" name="objetivo" required onChange={handleChange} placeholder="Qual o seu objetivo com o cabelo?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 focus:outline-none" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4">
+                    <button type="button" onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2 transition-colors">
+                      <ArrowLeft className="w-4 h-4" /> Voltar
+                    </button>
+                    
+                    <button type="submit" className="bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center gap-3 transition-colors">
+                      Enviar Ficha e Agendar
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
         </div>
       </div>
