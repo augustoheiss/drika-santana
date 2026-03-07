@@ -7,6 +7,7 @@ export default function BookingCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
+  const [customTime, setCustomTime] = useState(''); // Novo estado para o horário personalizado
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -16,10 +17,10 @@ export default function BookingCalendar() {
     objetivo: ''
   });
 
-  // Horários de 1 em 1 hora (08h às 17h)
+  // Horários com a opção "Outro" no final
   const availableTimes = [
     '08:00', '09:00', '10:00', '11:00', '12:00', 
-    '13:00', '14:00', '15:00', '16:00', '17:00'
+    '13:00', '14:00', '15:00', '16:00', '17:00', 'Outro'
   ];
 
   const meses = [
@@ -29,20 +30,20 @@ export default function BookingCalendar() {
 
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-  // Funções de navegação do calendário
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-    setSelectedDate(null); // Reseta o dia ao mudar de mês
+    setSelectedDate(null);
     setSelectedTime('');
+    setCustomTime('');
   };
 
   const nextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     setSelectedDate(null);
     setSelectedTime('');
+    setCustomTime('');
   };
 
-  // Lógica para montar os dias do mês na tela
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -51,11 +52,9 @@ export default function BookingCalendar() {
   const blanks = Array.from({ length: firstDayOfMonth });
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Data de hoje para bloquear dias passados (zerando a hora para comparar só o dia)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Formata a data escolhida para exibir e mandar pro WhatsApp
   const formatDate = (dateObj) => {
     if (!dateObj) return '';
     return dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -64,11 +63,15 @@ export default function BookingCalendar() {
   const handleDayClick = (day) => {
     const clickedDate = new Date(year, month, day);
     setSelectedDate(clickedDate);
-    setSelectedTime(''); // Reseta a hora ao trocar de dia
+    setSelectedTime('');
+    setCustomTime('');
   };
 
   const handleNextStep = () => {
-    if (selectedDate && selectedTime) setStep(2);
+    // Só avança se escolheu um horário fixo OU se escolheu 'Outro' e digitou qual é
+    if (selectedDate && (selectedTime !== 'Outro' || (selectedTime === 'Outro' && customTime))) {
+      setStep(2);
+    }
   };
 
   const handlePrevStep = () => setStep(1);
@@ -81,8 +84,9 @@ export default function BookingCalendar() {
     e.preventDefault();
     
     const dataFormatada = formatDate(selectedDate);
+    const horarioFinal = selectedTime === 'Outro' ? customTime : selectedTime;
 
-    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Data desejada:* ${dataFormatada} às ${selectedTime}%0A%0A*-- Ficha de Avaliação Prévia --*%0A*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Histórico Químico:* ${formData.historico}%0A*Alergias:* ${formData.alergias}%0A*Objetivo:* ${formData.objetivo}%0A%0AOlá Drika, podemos confirmar este horário?`;
+    const texto = `*Solicitação de Agendamento - Drika Studio*%0A%0A*Data desejada:* ${dataFormatada} às ${horarioFinal}%0A%0A*-- Ficha de Avaliação Prévia --*%0A*Nome:* ${formData.nome}%0A*Idade:* ${formData.idade}%0A*Histórico Químico:* ${formData.historico}%0A*Alergias:* ${formData.alergias}%0A*Objetivo:* ${formData.objetivo}%0A%0AOlá Drika, podemos confirmar este horário?`;
     
     const url = `https://wa.me/5511978466027?text=${texto}`;
     window.open(url, '_blank');
@@ -101,7 +105,6 @@ export default function BookingCalendar() {
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden min-h-[500px]">
           
-          {/* Barra de Progresso */}
           <div className="flex items-center justify-center gap-4 mb-8 max-w-md mx-auto">
             <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
             <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
@@ -109,7 +112,6 @@ export default function BookingCalendar() {
 
           <AnimatePresence mode="wait">
             
-            {/* PASSO 1: CALENDÁRIO CUSTOMIZADO E HORÁRIOS */}
             {step === 1 && (
               <motion.div 
                 key="step1"
@@ -119,7 +121,6 @@ export default function BookingCalendar() {
                 transition={{ duration: 0.3 }}
                 className="grid grid-cols-1 lg:grid-cols-2 gap-12"
               >
-                {/* Coluna Esquerda: O Calendário */}
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-serif text-slate-50 capitalize">
@@ -149,8 +150,7 @@ export default function BookingCalendar() {
                     {days.map(day => {
                       const dateObj = new Date(year, month, day);
                       const isPast = dateObj < today;
-                      const dayOfWeek = dateObj.getDay();
-                      const isClosed = dayOfWeek === 0 || dayOfWeek === 1; // 0: Dom, 1: Seg
+                      const isClosed = dateObj.getDay() === 0; 
                       const isDisabled = isPast || isClosed;
                       
                       const isSelected = selectedDate && 
@@ -174,10 +174,9 @@ export default function BookingCalendar() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-zinc-500 mt-4 text-center">* Dias indisponíveis aparecem apagados. Fechado aos domingos e segundas.</p>
+                  <p className="text-xs text-zinc-500 mt-4 text-center">* Dias indisponíveis aparecem apagados. Fechado aos domingos.</p>
                 </div>
 
-                {/* Coluna Direita: Os Horários */}
                 <div className="flex flex-col">
                   <div className="flex items-center gap-3 mb-6">
                     <Clock className="w-6 h-6 text-yellow-500" />
@@ -189,27 +188,50 @@ export default function BookingCalendar() {
                       <p>Por favor, selecione uma data no calendário ao lado para ver os horários.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-3">
-                      {availableTimes.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className={`p-3 rounded-lg border text-sm transition-all ${
-                            selectedTime === time 
-                              ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold shadow-lg shadow-yellow-500/20' 
-                              : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50 hover:bg-zinc-900'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
+                    <div className="flex flex-col gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-3">
+                        {availableTimes.map((time) => (
+                          <button
+                            key={time}
+                            onClick={() => setSelectedTime(time)}
+                            className={`p-3 rounded-lg border text-sm transition-all ${
+                              selectedTime === time 
+                                ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold shadow-lg shadow-yellow-500/20' 
+                                : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50 hover:bg-zinc-900'
+                            }`}
+                          >
+                            {time === 'Outro' ? 'Outro' : time}
+                          </button>
+                        ))}
+                      </div>
+
+                      <AnimatePresence>
+                        {selectedTime === 'Outro' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="bg-zinc-950 border border-yellow-500/30 p-4 rounded-lg mt-2">
+                              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Qual horário você prefere?</label>
+                              <input 
+                                type="time" 
+                                value={customTime}
+                                onChange={(e) => setCustomTime(e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:outline-none focus:border-yellow-500 transition-colors color-scheme-dark"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   )}
 
                   <div className="mt-auto pt-8 flex justify-end">
                     <button 
                       onClick={handleNextStep}
-                      disabled={!selectedDate || !selectedTime}
+                      disabled={!selectedDate || !selectedTime || (selectedTime === 'Outro' && !customTime)}
                       className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center justify-center gap-3 transition-colors"
                     >
                       Próximo Passo
@@ -220,7 +242,6 @@ export default function BookingCalendar() {
               </motion.div>
             )}
 
-            {/* PASSO 2: FICHA DE ANAMNESE (MANTIDA IGUAL, MAS COM DATA FORMATADA) */}
             {step === 2 && (
               <motion.div 
                 key="step2"
@@ -235,7 +256,7 @@ export default function BookingCalendar() {
                     <h3 className="text-xl font-serif text-slate-50">2. Ficha de Avaliação Prévia</h3>
                   </div>
                   <div className="text-xs text-yellow-500 font-bold bg-yellow-500/10 px-4 py-2 rounded-full border border-yellow-500/20">
-                    {formatDate(selectedDate)} às {selectedTime}
+                    {formatDate(selectedDate)} às {selectedTime === 'Outro' ? customTime : selectedTime}
                   </div>
                 </div>
 
