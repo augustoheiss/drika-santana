@@ -51,7 +51,7 @@ export default function Footer() {
                 <Instagram size={15} />
               </a>
               <a
-                href="https://wa.me/5511987466027"
+                href="https://wa.me/5511978466027"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp da Drika Santana"
@@ -82,12 +82,12 @@ export default function Footer() {
                 <Phone size={15} className="text-[#D4AF37] flex-shrink-0 mt-0.5" />
                 <div>
                   <a
-                    href="https://wa.me/5511987466027"
+                    href="https://wa.me/5511978466027"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-zinc-400 text-sm font-light hover:text-[#D4AF37] transition-colors"
                   >
-                    (11) 98746-6027
+                    (11) 97846-6027
                   </a>
                   <p className="text-zinc-600 text-xs mt-0.5 font-light">WhatsApp</p>
                 </div>
