@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, ArrowRight, ArrowLeft, Send, ClipboardType, ChevronLeft, ChevronRight, CheckSquare, Square, Info } from 'lucide-react';
+
+const WEBHOOK_URL = "https://hook.us1.make.com/sua-url-aqui-gerada-depois";
 
 export default function BookingCalendar() {
   const [step, setStep] = useState(1);
@@ -9,7 +11,9 @@ export default function BookingCalendar() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
   const [customTime, setCustomTime] = useState('');
-  
+  const [blockedTimes, setBlockedTimes] = useState([]);
+  const [isLoadingTimes, setIsLoadingTimes] = useState(false);
+
   const [formData, setFormData] = useState({
     nome: '',
     idade: '',
@@ -19,6 +23,34 @@ export default function BookingCalendar() {
     historicoUnhas: '',
     autorizaImagem: 'Não informado'
   });
+
+  useEffect(() => {
+    if (!selectedDate) {
+      setBlockedTimes([]);
+      return;
+    }
+
+    const yyyy = selectedDate.getFullYear();
+    const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(selectedDate.getDate()).padStart(2, '0');
+    const dateParam = `${yyyy}-${mm}-${dd}`;
+
+    const fetchBlockedTimes = async () => {
+      setIsLoadingTimes(true);
+      try {
+        const response = await fetch(`${WEBHOOK_URL}?date=${dateParam}`);
+        const data = await response.json();
+        setBlockedTimes(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Erro ao sincronizar horários com o Google Calendar:', error);
+        setBlockedTimes([]);
+      } finally {
+        setIsLoadingTimes(false);
+      }
+    };
+
+    fetchBlockedTimes();
+  }, [selectedDate]);
 
   const availableServices = [
     { id: 'corte', label: 'Corte & Visagismo', category: 'cabelo' },
@@ -65,6 +97,12 @@ export default function BookingCalendar() {
     return dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
+  const formatTimeLabel = (time) => {
+    if (time === 'Outro') return 'Sugerir Outro';
+    const hour = parseInt(time.split(':')[0], 10);
+    return `A partir das ${hour}h`;
+  };
+
   const handleDayClick = (day) => {
     setSelectedDate(new Date(year, month, day));
     setSelectedTime('');
@@ -94,7 +132,7 @@ export default function BookingCalendar() {
 
     fichaDinamica += `\n*Autoriza uso de imagem:* ${formData.autorizaImagem}`;
 
-    const textoBase = `*Solicitação de Agendamento - Drika Studio*\n\n*Serviço(s):* ${servicosEscolhidos}\n*Data desejada:* ${dataFormatada} às ${horarioFinal}\n\n*-- Ficha de Anamnese --*\n${fichaDinamica}\n\n_Estou ciente sobre a política do sinal para reserva do horário._\n\nOlá Drika, podemos confirmar este agendamento?`;
+    const textoBase = `*Solicitação de Agendamento - Drika Studio*\n\n*Serviço(s):* ${servicosEscolhidos}\n*Data desejada:* ${dataFormatada} (A partir das ${horarioFinal})\n\n*-- Ficha de Anamnese --*\n${fichaDinamica}\n\n_Estou ciente sobre a política do sinal para reserva do horário._\n\nOlá Drika, podemos acertar os detalhes do procedimento e do sinal para você marcar na agenda?`;
     
     // O escudo protetor que traduz tudo para o WhatsApp não cortar nada
     const textoCodificado = encodeURIComponent(textoBase);
@@ -193,14 +231,46 @@ export default function BookingCalendar() {
                   </div>
                   {!selectedDate ? (
                     <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center text-zinc-500"><p>Selecione uma data ao lado.</p></div>
+                  ) : isLoadingTimes ? (
+                    <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center">
+                      <motion.p
+                        className="text-yellow-500 text-sm font-medium"
+                        animate={{ opacity: [0.4, 1, 0.4] }}
+                        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                      >
+                        A sincronizar com a agenda de Drika...
+                      </motion.p>
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-3">
-                        {availableTimes.map((time) => (
-                          <button key={time} onClick={() => setSelectedTime(time)} className={`p-3 rounded-lg border text-sm ${selectedTime === time ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold' : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50'}`}>
-                            {time}
-                          </button>
-                        ))}
+                        {availableTimes.map((time) => {
+                          const isBlocked = blockedTimes.includes(time);
+                          const isSelected = selectedTime === time;
+                          return (
+                            <button
+                              key={time}
+                              onClick={() => !isBlocked && setSelectedTime(time)}
+                              disabled={isBlocked}
+                              className={`p-3 rounded-lg border text-sm transition-all leading-tight flex flex-col items-center justify-center gap-0.5 ${
+                                isBlocked
+                                  ? 'bg-zinc-900 border-zinc-800 text-zinc-600 opacity-50 cursor-not-allowed'
+                                  : isSelected
+                                    ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold'
+                                    : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50'
+                              }`}
+                            >
+                              {isBlocked ? (
+                                <>
+                                  <span className="line-through text-xs">{formatTimeLabel(time)}</span>
+                                  <span className="text-xs font-bold text-zinc-500 not-italic">Ocupado</span>
+                                </>
+                              ) : (
+                                <span>{formatTimeLabel(time)}</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                       {selectedTime === 'Outro' && (
                         <div className="bg-zinc-950 border border-yellow-500/30 p-4 rounded-lg mt-2">

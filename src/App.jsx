@@ -1,21 +1,21 @@
-import React from 'react'
-import Hero from './components/Hero'
-import Manifesto from './components/Manifesto'
-import Services from './components/Services'
-import Media from './components/Media' // <-- Nova importação aqui
-import BookingCalendar from './components/BookingCalendar'
-import Footer from './components/Footer'
-
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import Home from './pages/Home'
+import Sobre from './pages/Sobre'
+import Servicos from './pages/Servicos'
+import Contato from './pages/Contato'
 
 export default function App() {
   return (
-    <main className="min-h-screen bg-zinc-950 text-slate-50">
-      <Hero />
-      <Manifesto />
-      <Services />
-      <Media /> 
-      <BookingCalendar />
-      <Footer />
-    </main>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="sobre" element={<Sobre />} />
+          <Route path="servicos" element={<Servicos />} />
+          <Route path="contato" element={<Contato />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
