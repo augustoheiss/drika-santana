@@ -13,6 +13,7 @@ import {
   Wand2,
 } from 'lucide-react'
 import Media from '../components/Media'
+import VisagismImpact from '../components/VisagismImpact'
 
 const categories = [
   {
@@ -211,6 +212,9 @@ export default function Servicos() {
           </div>
         </section>
       ))}
+
+      {/* ── Visagism Impact ── */}
+      <VisagismImpact />
 
       {/* ── Booking CTA ── */}
       <section className="py-20 px-6 bg-zinc-900/30 border-t border-zinc-900 text-center">
