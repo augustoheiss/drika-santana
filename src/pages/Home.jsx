@@ -117,6 +117,136 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Visagismo Science / Diptych ── */}
+      <section className="relative py-24 bg-zinc-950 border-t border-zinc-900 overflow-hidden px-6 md:px-12">
+
+        {/* Ambient glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[700px] h-[400px] rounded-full bg-[#4A3B6B] opacity-[0.07] blur-[130px]" />
+          <div className="absolute right-0 bottom-0 w-[400px] h-[400px] rounded-full bg-[#D4AF37] opacity-[0.04] blur-[100px]" />
+        </div>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
+
+        <div className="relative z-10 max-w-6xl mx-auto">
+
+          {/* Section header */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 text-xs tracking-[0.25em] uppercase text-[#D4AF37] font-medium mb-6">
+              Visagismo & Ciência
+            </span>
+            <h2 className="font-serif text-4xl md:text-5xl text-slate-50 leading-tight">
+              A Engenharia por trás da<br />
+              <span className="text-[#D4AF37] italic">Sua Beleza.</span>
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto mt-6 font-light leading-relaxed text-base md:text-lg">
+              O Visagismo não é achismo. É a aplicação das proporções áureas encontradas em todo
+              o Universo — da casca de uma concha à formação de galáxias — impressas no seu rosto
+              para revelar sua verdadeira identidade e equilíbrio.
+            </p>
+          </motion.div>
+
+          {/* Diptych grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-14">
+
+            {/* Card 1 — ciencia-01 */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 24 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.9, ease: 'easeOut' }}
+              className="group relative bg-zinc-900 border border-zinc-800 hover:border-[#D4AF37]/40 transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+              <div className="relative overflow-hidden">
+                <img
+                  src="/images/ciencia-01.jpg"
+                  alt="Padrões de proporção áurea no Visagismo"
+                  className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/20 to-transparent" />
+              </div>
+
+              <div className="p-7">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-6 h-px bg-[#D4AF37]/60" />
+                  <span className="text-[#D4AF37] text-xs tracking-[0.25em] uppercase font-semibold">Conexão Universal</span>
+                </div>
+                <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                  Padrões de crescimento sagrados impressos na sua estrutura.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 2 — ciencia-02 */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 24 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.15 }}
+              className="group relative bg-zinc-900 border border-zinc-800 hover:border-[#D4AF37]/40 transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+              <div className="relative overflow-hidden">
+                <img
+                  src="/images/ciencia-02.jpg"
+                  alt="Engenharia moderna e matemática do equilíbrio"
+                  className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/20 to-transparent" />
+              </div>
+
+              <div className="p-7">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-6 h-px bg-[#D4AF37]/60" />
+                  <span className="text-[#D4AF37] text-xs tracking-[0.25em] uppercase font-semibold">Aplicação de Autoridade</span>
+                </div>
+                <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                  A engenharia moderna traduzindo a matemática do equilíbrio.
+                </p>
+              </div>
+            </motion.div>
+
+          </div>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.25 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Link
+              to="/sobre"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 border border-zinc-700 text-zinc-300 font-medium text-xs tracking-widest uppercase rounded-sm transition-all duration-300 hover:border-[#D4AF37]/50 hover:text-zinc-100"
+            >
+              Entenda minha Filosofia
+              <ArrowRight size={14} />
+            </Link>
+            <Link
+              to="/contato"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-[#D4AF37] text-zinc-950 font-semibold text-xs tracking-widest uppercase rounded-sm transition-all duration-300 hover:bg-[#E8C95D] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] active:scale-95"
+            >
+              Agendar com quem entende a Ciência
+              <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
+      </section>
+
       {/* ── Final CTA ── */}
       <section className="relative py-32 bg-zinc-950 overflow-hidden px-6 text-center">
         <div className="absolute inset-0 pointer-events-none">
