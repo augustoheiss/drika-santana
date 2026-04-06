@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Scissors,
@@ -11,6 +12,8 @@ import {
   Feather,
   ArrowRight,
   Wand2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
 import Media from '../components/Media'
 import VisagismImpact from '../components/VisagismImpact'
@@ -137,6 +140,226 @@ function ServiceCard({ service }) {
   )
 }
 
+// ── Video Gallery ──────────────────────────────────────────────────────────
+
+const videos = [
+  'drika-bio.mp4',
+  'Corte moderno - A transição capilar traz leveza e novo estilo. Este é o segundo corte que fizemo.mp4',
+  'Progressiva + Corte com Franja = O combo da perfeição!Dá para ver a felicidade no olhar, né Cabe.mp4',
+  'Muita gente pergunta como é o Drika Hair, e hoje abro as portas para vocês conhecerem cada detal.mp4',
+  'snapinsta.com.br-69d3fa08c5a47.mp4',
+  'snapinsta.com.br-69d3fa9e36272.mp4',
+  'snapinsta.com.br-69d3fac3d2e73.mp4',
+  'snapinsta.com.br-69d3fad50f349.mp4',
+  'snapinsta.com.br-69d3faea5541f.mp4',
+  'snapinsta.com.br-69d3faf6ccc95.mp4',
+  'snapinsta.com.br-69d3fb1857324.mp4',
+  'snapinsta.com.br-69d3fb4948347.mp4',
+  'snapinsta.com.br-69d3fbb13656c.mp4',
+]
+
+// Detect touch/hover-incapable devices once (outside component = stable ref)
+const isTouchDevice = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(hover: none)').matches
+
+function VideoCard({ src, index }) {
+  const videoRef = useRef(null)
+  const cardRef  = useRef(null)
+  const isTouch  = useRef(isTouchDevice())   // stable across re-renders
+
+  const [isMuted,   setIsMuted]   = useState(true)
+  const [isActive,  setIsActive]  = useState(false)
+
+  // ── 1. Desktop hover (mouse only) ────────────────────────────────────────
+  const handleMouseEnter = () => {
+    if (isTouch.current) return          // skip on touch devices
+    setIsActive(true)
+    videoRef.current?.play().catch(() => {})
+  }
+
+  const handleMouseLeave = () => {
+    if (isTouch.current) return
+    setIsActive(false)
+    videoRef.current?.pause()
+  }
+
+  // ── 2. Mobile: IntersectionObserver auto-play ─────────────────────────────
+  useEffect(() => {
+    // Only attach observer on touch devices — desktop uses hover
+    if (!isTouch.current) return
+
+    const el = cardRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsActive(true)
+          videoRef.current?.play().catch(() => {})
+        } else {
+          setIsActive(false)
+          videoRef.current?.pause()
+        }
+      },
+      { threshold: 0.5 }  // 50% visible triggers play (Instagram-style)
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // ── 3. Keep video.muted DOM attr in sync (React prop is not reactive) ─────
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = isMuted
+  }, [isMuted])
+
+  const handleVolumeToggle = (e) => {
+    e.stopPropagation()
+    setIsMuted((prev) => !prev)
+  }
+
+  // ── Derived visual classes (state-driven, works on both desktop + mobile) ─
+  const videoClass = `
+    absolute inset-0 w-full h-full object-cover
+    transition-all duration-500
+    ${isActive ? 'grayscale-0 brightness-100' : 'grayscale brightness-50'}
+  `
+  const playOverlayClass = `
+    absolute inset-0 flex items-center justify-center
+    transition-opacity duration-300 z-10 pointer-events-none
+    ${isActive ? 'opacity-0' : 'opacity-60'}
+  `
+  const goldLineClass = `
+    absolute inset-x-0 top-0 h-[2px]
+    bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent
+    transition-opacity duration-500 z-10
+    ${isActive ? 'opacity-100' : 'opacity-0'}
+  `
+  const labelClass = `
+    absolute bottom-0 inset-x-0 py-2.5 px-3
+    bg-gradient-to-t from-zinc-950/90 to-transparent
+    text-[10px] tracking-[0.18em] uppercase
+    transition-colors duration-300 z-10
+    ${isActive ? 'text-[#D4AF37]' : 'text-[#D4AF37]/70'}
+  `
+  const volumeBtnClass = `
+    absolute bottom-10 right-2 z-20
+    flex items-center justify-center
+    w-8 h-8 rounded-full
+    bg-zinc-950/70 backdrop-blur-sm
+    border border-zinc-700/60 text-zinc-100
+    transition-all duration-200
+    hover:bg-zinc-800/90 hover:border-[#D4AF37]/50 hover:text-[#D4AF37]
+    active:scale-90
+    ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}
+  `
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.55, delay: index * 0.05, ease: 'easeOut' }}
+      className="relative overflow-hidden rounded-sm border border-zinc-800 bg-zinc-900 cursor-pointer"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Gold accent line — state-driven (works on desktop + mobile) */}
+      <div className={goldLineClass} />
+
+      {/* Scale wrapper — Framer Motion handles desktop scale; on mobile we
+          use a CSS class so the effect is also visible without hover */}
+      <motion.div
+        className="relative w-full aspect-[9/16] overflow-hidden"
+        animate={{ scale: isActive ? 1.03 : 1 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+      >
+        <video
+          ref={videoRef}
+          src={`/videos/${src}`}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className={videoClass}
+        />
+
+        {/* Play icon overlay — hides when active */}
+        <div className={playOverlayClass}>
+          <div className="w-12 h-12 rounded-full border border-[#D4AF37]/60 bg-zinc-950/60 flex items-center justify-center">
+            <svg className="w-5 h-5 text-[#D4AF37] translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Mute/Unmute button — appears when isActive */}
+        <button
+          onClick={handleVolumeToggle}
+          aria-label={isMuted ? 'Ativar som' : 'Desativar som'}
+          className={volumeBtnClass}
+        >
+          {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+        </button>
+      </motion.div>
+
+      {/* Bottom label */}
+      <div className={labelClass}>
+        Transformação #{index + 1}
+      </div>
+    </motion.div>
+  )
+}
+
+function VideoGallery() {
+  return (
+    <section className="py-24 px-6 md:px-12 border-t border-zinc-900">
+      <div className="max-w-7xl mx-auto">
+
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mb-16 max-w-3xl"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-px bg-[#D4AF37]/60" />
+            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-semibold">
+              Galeria em Movimento
+            </span>
+          </div>
+
+          <h2 className="font-serif text-3xl md:text-5xl text-zinc-50 leading-tight mb-6">
+            A Engenharia em Movimento:{' '}
+            <span className="text-[#D4AF37] italic">
+              Onde a Técnica Encontra a Identidade.
+            </span>
+          </h2>
+
+          <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed max-w-2xl">
+            O visagismo e a beleza não são estáticos; eles ganham vida no movimento, na textura,
+            no caimento e na luz. O que você vê abaixo não são apenas resultados capilares, são{' '}
+            <span className="text-zinc-200 font-normal">resgates de identidade</span>. Cada frame
+            é a prova visual de que, com a técnica correta, a sua imagem se torna a sua maior aliada.{' '}
+            <span className="text-[#D4AF37]/80">Passe o mouse para testemunhar a transformação.</span>
+          </p>
+        </motion.div>
+
+        {/* Video grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+          {videos.map((src, i) => (
+            <VideoCard key={src} src={src} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function Servicos() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
@@ -212,6 +435,9 @@ export default function Servicos() {
           </div>
         </section>
       ))}
+
+      {/* ── Video Gallery ── */}
+      <VideoGallery />
 
       {/* ── Visagism Impact ── */}
       <VisagismImpact />

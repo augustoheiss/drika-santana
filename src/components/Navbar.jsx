@@ -8,6 +8,7 @@ const navLinks = [
   { to: '/', label: 'Início', end: true },
   { to: '/sobre', label: 'Sobre Mim' },
   { to: '/servicos', label: 'Serviços' },
+  { to: '/avaliacoes', label: 'Avaliações' },
 ]
 
 export default function Navbar() {
