@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { MapPin, Phone, Instagram, Clock, Heart } from 'lucide-react'
 import logo from '../assets/logo.png'
 
@@ -158,6 +159,13 @@ export default function Footer() {
           className="pt-8 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-700 text-xs font-light"
         >
           <p>© {currentYear} Drika Santana Studio de Embelezamento. Todos os direitos reservados.</p>
+          <Link
+            to="/termos"
+            id="footer-legal-link"
+            className="text-zinc-700 text-xs font-light hover:text-[#D4AF37]/70 transition-colors duration-300"
+          >
+            Termos de Uso e Privacidade
+          </Link>
           <p className="flex items-center gap-1.5">
             Desenvolvido com <Heart size={11} className="text-[#D4AF37]/60" /> por Augusto Heiss
           </p>

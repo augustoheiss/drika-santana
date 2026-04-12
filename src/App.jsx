@@ -5,6 +5,7 @@ import Sobre from './pages/Sobre'
 import Servicos from './pages/Servicos'
 import Contato from './pages/Contato'
 import Avaliacoes from './pages/Avaliacoes'
+import Termos from './pages/Termos'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="servicos" element={<Servicos />} />
           <Route path="contato" element={<Contato />} />
           <Route path="avaliacoes" element={<Avaliacoes />} />
+          <Route path="termos" element={<Termos />} />
         </Route>
       </Routes>
     </BrowserRouter>
