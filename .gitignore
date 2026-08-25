@@ -9,3 +9,7 @@ dist
 .gemini/
 .agents/
 .cursor/
+
+# Master Plan
+master-plan/
+master-plan
