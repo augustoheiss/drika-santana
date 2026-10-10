@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin, Phone, Instagram, Clock, Heart } from 'lucide-react'
 import logo from '../assets/logo.png'
+import { HOURS_TABLE } from '../config/businessHours'
 
 export default function Footer() {
   const ref = useRef(null)
@@ -35,10 +36,19 @@ export default function Footer() {
             <p className="text-[#D4AF37] text-xs tracking-[0.2em] uppercase mb-4">
               Studio de Embelezamento
             </p>
-            <p className="text-zinc-600 text-sm font-light leading-relaxed text-center md:text-left">
-              Studio de Embelezamento. Décadas de experiência, formações constantes e cuidados personalizados para cada momento da sua vida.<br />
-              
+            <p className="text-zinc-400 text-sm font-light leading-relaxed text-center md:text-left">
+              Atendimento acolhedor e especializado em Itaquera. Visagismo, cortes de precisão, crespos e cacheados, barbearia e colorimetria avançada.
             </p>
+
+            {/* Quick navigation links */}
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-5 text-xs text-zinc-400">
+              <Link to="/" className="hover:text-[#D4AF37] transition-colors">Início</Link>
+              <Link to="/sobre" className="hover:text-[#D4AF37] transition-colors">Sobre</Link>
+              <Link to="/servicos" className="hover:text-[#D4AF37] transition-colors">Serviços</Link>
+              <Link to="/aprenda" className="text-[#D4AF37] font-medium hover:text-[#E8C95D] transition-colors">Aprenda</Link>
+              <Link to="/avaliacoes" className="hover:text-[#D4AF37] transition-colors">Avaliações</Link>
+              <Link to="/contato" className="hover:text-[#D4AF37] transition-colors">Contato</Link>
+            </div>
 
             {/* Social */}
             <div className="flex items-center gap-3 mt-6">
@@ -47,7 +57,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram da Drika Santana"
-                className="w-9 h-9 flex items-center justify-center border border-zinc-800 rounded-sm text-zinc-500 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] transition-all duration-300 hover:bg-[#D4AF37]/5"
+                className="w-9 h-9 flex items-center justify-center border border-zinc-800 rounded-sm text-zinc-400 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] transition-all duration-300 hover:bg-[#D4AF37]/5"
               >
                 <Instagram size={15} />
               </a>
@@ -56,7 +66,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp da Drika Santana"
-                className="w-9 h-9 flex items-center justify-center border border-zinc-800 rounded-sm text-zinc-500 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] transition-all duration-300 hover:bg-[#D4AF37]/5"
+                className="w-9 h-9 flex items-center justify-center border border-zinc-800 rounded-sm text-zinc-400 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] transition-all duration-300 hover:bg-[#D4AF37]/5"
               >
                 <Phone size={15} />
               </a>
@@ -115,11 +125,7 @@ export default function Footer() {
           <div>
             <h4 className="font-serif text-zinc-300 mb-6 text-lg">Horário de Atendimento</h4>
             <div className="space-y-3">
-              {[
-                { days: 'Segunda a Sexta', hours: '08:00 – 18:00' },
-                { days: 'Sábado', hours: '08:00 – 17:00' },
-                { days: 'Domingo', hours: 'Fechado' },
-              ].map((item) => (
+              {HOURS_TABLE.map((item) => (
                 <div key={item.days} className="flex items-center justify-between gap-4 py-2 border-b border-zinc-800/60">
                   <div className="flex items-center gap-2">
                     <Clock size={12} className="text-[#D4AF37]/60 flex-shrink-0" />
@@ -156,18 +162,18 @@ export default function Footer() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 1, delay: 0.4 }}
-          className="pt-8 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-700 text-xs font-light"
+          className="pt-8 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-400 text-xs font-light"
         >
           <p>© {currentYear} Drika Santana Studio de Embelezamento. Todos os direitos reservados.</p>
           <Link
             to="/termos"
             id="footer-legal-link"
-            className="text-zinc-700 text-xs font-light hover:text-[#D4AF37]/70 transition-colors duration-300"
+            className="text-zinc-400 text-xs font-light hover:text-[#D4AF37] transition-colors duration-300"
           >
             Termos de Uso e Privacidade
           </Link>
-          <p className="flex items-center gap-1.5">
-            Desenvolvido com <Heart size={11} className="text-[#D4AF37]/60" /> por Augusto Heiss
+          <p className="flex items-center gap-1.5 text-zinc-500">
+            Desenvolvido com <Heart size={11} className="text-[#D4AF37]" /> por Augusto Heiss
           </p>
         </motion.div>
       </div>

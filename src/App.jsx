@@ -5,6 +5,7 @@ import Sobre from './pages/Sobre'
 import Servicos from './pages/Servicos'
 import Contato from './pages/Contato'
 import Avaliacoes from './pages/Avaliacoes'
+import Aprenda from './pages/Aprenda'
 import Termos from './pages/Termos'
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="sobre" element={<Sobre />} />
           <Route path="servicos" element={<Servicos />} />
+          <Route path="aprenda" element={<Aprenda />} />
           <Route path="contato" element={<Contato />} />
           <Route path="avaliacoes" element={<Avaliacoes />} />
           <Route path="termos" element={<Termos />} />

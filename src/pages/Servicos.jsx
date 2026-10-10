@@ -13,9 +13,12 @@ import {
   ArrowRight,
   Wand2,
   Instagram,
+  Clock,
 } from 'lucide-react'
 import Media from '../components/Media'
 import VisagismImpact from '../components/VisagismImpact'
+import FAQ from '../components/FAQ'
+import Seo from '../components/Seo'
 
 const categories = [
   {
@@ -27,52 +30,59 @@ const categories = [
       {
         icon: <Scissors className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Visagismo Prático & Cortes',
+        duration: 'Aprox. 1h a 1h30',
         description:
-          'Cortes unissex projetados para o seu formato de rosto e rotina. O fim do "achismo" na cadeira do salão.',
+          'Cortes unissex projetados para o seu formato de rosto e rotina. O fim do "achismo" na cadeira do salão com diagnóstico prévio.',
       },
       {
         icon: <User className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Crespos & Cacheados (Dry Cut)',
+        duration: 'Aprox. 1h30 a 2h',
         description:
-          'Respeito à estrutura espiralada e ao fator de encolhimento. Lavamos e secamos para avaliar o caimento natural, esculpindo o corte a seco.',
+          'Respeito à estrutura espiralada e ao fator de encolhimento. Avaliamos o caimento natural e esculpimos o corte a seco com definição.',
       },
       {
         icon: <Wand2 className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Design de Cortes — Chanel e Long Bob',
+        duration: 'Aprox. 1h30',
         description:
-          'Especialidade em Chanel de bico e Long Bob com precisão editorial e baixa manutenção para o dia a dia.',
+          'Especialidade em Chanel de bico e Long Bob com precisão geométrica editorial e facílima manutenção para o seu dia a dia.',
       },
       {
         icon: <Palette className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Alquimia da Colorimetria',
+        duration: 'Aprox. 2h30 a 4h',
         description:
-          'Mechas, iluminação e coloração global com foco em saúde capilar e resultados de baixa manutenção.',
+          'Mechas, iluminação personalizada e coloração global com teste de mecha rigoroso e foco na saúde e integridade do fio.',
       },
       {
         icon: <Droplets className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Tratamentos de Alta Performance',
+        duration: 'Aprox. 1h a 1h30',
         description:
-          'Cronogramas capilares avançados, reconstrução e hidratação profunda para resgatar a vitalidade do fio.',
+          'Cronogramas capilares avançados, reconstrução lipídica e hidratação profunda para recuperar vitalidade e brilho.',
       },
       {
         icon: <Sparkles className="w-5 h-5 text-[#D4AF37]" />,
         title: 'Penteados e Estilização',
+        duration: 'Aprox. 1h30',
         description:
-          'Design de penteados para eventos, unindo fixação, elegância e respeito à estrutura do seu cabelo.',
+          'Design de penteados para eventos sociais e editoriais, unindo fixação duradoura, elegância e respeito à textura do cabelo.',
       },
     ],
   },
   {
     id: 'barba',
-    label: 'Barba',
-    headline: 'Barbearia Clássica',
-    description: 'Tradição e precisão para uma imagem impecável e atemporal.',
+    label: 'Barba & Masculino',
+    headline: 'Barbearia Clássica & Cortes Masculinos',
+    description: 'Tradição, precisão geométrica e alinhamento para uma imagem profissional impecável.',
     services: [
       {
         icon: <Zap className="w-5 h-5 text-[#D4AF37]" />,
-        title: 'Barbearia Clássica',
+        title: 'Barbearia Clássica & Visagismo Masculino',
+        duration: 'Aprox. 45min a 1h',
         description:
-          'Design de barba e cortes masculinos alinhados à sua identidade visual e imagem profissional.',
+          'Design de barba e cortes masculinos pensados para harmonizar com a estrutura óssea e valorizar a sua autoridade visual.',
       },
     ],
   },
@@ -84,23 +94,25 @@ const categories = [
     services: [
       {
         icon: <Feather className="w-5 h-5 text-[#D4AF37]" />,
-        title: 'Design de Sobrancelhas',
+        title: 'Design de Sobrancelhas Personalizado',
+        duration: 'Aprox. 40min',
         description:
-          'Técnicas que respeitam a simetria e a naturalidade do seu rosto, sem exageros — apenas valorização.',
+          'Técnicas com paquímetro e visagismo que respeitam o desenho natural, sem arquear de forma artificial — apenas valorização pura.',
       },
     ],
   },
   {
     id: 'unhas',
     label: 'Unhas',
-    headline: 'Nail Care Premium',
-    description: 'Cuidado rigoroso com biossegurança e acabamento impecável para mãos e pés.',
+    headline: 'Nail Care Premium & Biossegurança',
+    description: 'Cuidado rigoroso com materiais esterilizados em autoclave e acabamento refinado para mãos e pés.',
     services: [
       {
         icon: <Star className="w-5 h-5 text-[#D4AF37]" />,
-        title: 'Manicure Premium',
+        title: 'Manicure & Pedicure Premium',
+        duration: 'Aprox. 1h a 1h30',
         description:
-          'Arte e saúde biômica para suas mãos e pés. Biossegurança rigorosa e acabamento de nível editorial.',
+          'Biossegurança hospitalar, esterilização comprovada, cuticulagem delicada e esmaltação duradoura de nível editorial.',
       },
     ],
   },
@@ -120,17 +132,27 @@ function ServiceCard({ service }) {
   return (
     <motion.div
       variants={itemVariants}
-      className="group relative p-7 border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/80 hover:border-[#D4AF37]/40 transition-all duration-300 flex flex-col"
+      className="group relative p-7 border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/80 hover:border-[#D4AF37]/40 transition-all duration-300 flex flex-col justify-between"
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/0 to-transparent group-hover:via-[#D4AF37]/20 transition-all duration-500" />
-      <div className="mb-5 p-3.5 bg-zinc-950 inline-block border border-zinc-800 group-hover:border-[#D4AF37]/30 transition-colors">
-        {service.icon}
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <div className="p-3 bg-zinc-950 inline-block border border-zinc-800 group-hover:border-[#D4AF37]/30 transition-colors">
+            {service.icon}
+          </div>
+          {service.duration && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-400 font-light">
+              <Clock size={11} className="text-[#D4AF37]" />
+              {service.duration}
+            </span>
+          )}
+        </div>
+        <h4 className="font-serif text-lg text-zinc-100 mb-2 leading-snug">{service.title}</h4>
+        <p className="text-zinc-500 text-sm leading-relaxed font-light mb-6">{service.description}</p>
       </div>
-      <h4 className="font-serif text-lg text-zinc-100 mb-2 leading-snug">{service.title}</h4>
-      <p className="text-zinc-500 text-sm leading-relaxed font-light flex-1">{service.description}</p>
       <Link
         to="/contato"
-        className="mt-5 inline-flex items-center gap-1.5 text-[#D4AF37] text-xs tracking-widest uppercase font-semibold hover:gap-2.5 transition-all duration-200"
+        className="inline-flex items-center gap-1.5 text-[#D4AF37] text-xs tracking-widest uppercase font-semibold hover:gap-2.5 transition-all duration-200"
       >
         Agendar este serviço
         <ArrowRight size={13} />
@@ -160,7 +182,6 @@ const instagramVideos = [
   'https://www.instagram.com/drika_hair_santana/reel/DTRRGAxkUYf/',
   'https://www.instagram.com/drika_hair_santana/reel/DTgkSA1iWys/',
   'https://www.instagram.com/drika_hair_santana/reel/DTv5xwgEZon/',
-  'https://www.instagram.com/drika_hair_santana/reel/DUo0RWEEQ_K/',
   'https://www.instagram.com/drika_hair_santana/reel/DVPEUHHkSC7/',
   'https://www.instagram.com/drika_hair_santana/reel/DVRpLZqjQjy/',
   'https://www.instagram.com/drika_hair_santana/reel/DVUN8Y_DQfR/',
@@ -303,6 +324,11 @@ function VideoGallery() {
 export default function Servicos() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
+      <Seo
+        title="Menu de Serviços & Visagismo — Drika Santana Studio"
+        description="Conheça nossos serviços em Itaquera: Visagismo prático, cortes geométricos (Chanel e Long Bob), Dry Cut para crespos e cacheados, barbearia e colorimetria."
+        canonicalUrl="https://drikasantana.vercel.app/servicos"
+      />
 
       {/* ── Page header ── */}
       <section className="relative py-20 px-6 border-b border-zinc-900 overflow-hidden">
@@ -407,6 +433,9 @@ export default function Servicos() {
           </Link>
         </motion.div>
       </section>
+
+      {/* ── Dúvidas Frequentes sobre Serviços ── */}
+      <FAQ className="border-t border-zinc-900 bg-zinc-900/10" />
 
       {/* ── Masterclasses & Podcasts ── */}
       <Media />

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Shield, FileText, Scale, Lock, UserCheck, Cookie, Mail } from 'lucide-react'
+import Seo from '../components/Seo'
 
 /* ─── Animation Variants ─────────────────────────────────────────────────── */
 
@@ -62,6 +63,11 @@ function LegalSubSection({ number, title, children }) {
 export default function Termos() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
+      <Seo
+        title="Termos de Uso e Política de Privacidade — Drika Santana Studio"
+        description="Termos de uso, política de privacidade e conformidade com a LGPD do Studio Drika Santana."
+        canonicalUrl="https://drikasantana.vercel.app/termos"
+      />
 
       {/* ── Hero header ── */}
       <section className="relative py-20 px-6 border-b border-zinc-900 overflow-hidden text-center">

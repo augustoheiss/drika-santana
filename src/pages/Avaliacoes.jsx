@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Star, ExternalLink, Quote } from 'lucide-react'
+import Seo from '../components/Seo'
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -144,8 +145,8 @@ function StatsBar() {
     >
       {[
         { value: '10+', label: 'Avaliações verificadas' },
-        { value: '5.0', label: 'Média no Google' },
-        { value: '100%', label: 'Satisfação dos clientes' },
+        { value: '5.0 ★', label: 'Média no Google' },
+        { value: '100%', label: 'Recomendação das clientes' },
       ].map(({ value, label }) => (
         <div key={label} className="text-center">
           <p className="font-serif text-3xl md:text-4xl text-[#D4AF37] leading-none mb-1">
@@ -163,6 +164,11 @@ function StatsBar() {
 export default function Avaliacoes() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
+      <Seo
+        title="Avaliações dos Clientes (5.0 ★ no Google) — Drika Santana Studio"
+        description="Depoimentos reais de quem frequenta o Studio Drika Santana em Itaquera. Avaliação 5.0 estrelas no Google Maps."
+        canonicalUrl="https://drikasantana.vercel.app/avaliacoes"
+      />
 
       {/* ── Hero ── */}
       <section className="relative py-24 px-6 border-b border-zinc-900 overflow-hidden text-center">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, ArrowRight, ArrowLeft, Send, ClipboardType, ChevronLeft, ChevronRight, CheckSquare, Square, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Clock, ArrowRight, ArrowLeft, Send, ClipboardType, ChevronLeft, ChevronRight, CheckSquare, Square, Info, ShieldCheck } from 'lucide-react';
+import { BOOKING_SLOTS, OPENING_TIME, CLOSING_TIME, HOURS_SUMMARY, isOpenDay, isWithinOpeningHours } from '../config/businessHours';
 
 const WEBHOOK_URL = "https://hook.us1.make.com/sua-url-aqui-gerada-depois";
 
@@ -25,7 +27,7 @@ export default function BookingCalendar() {
   });
 
   useEffect(() => {
-    if (!selectedDate) {
+    if (!selectedDate || WEBHOOK_URL.includes("sua-url-aqui")) {
       setBlockedTimes([]);
       return;
     }
@@ -63,7 +65,7 @@ export default function BookingCalendar() {
     { id: 'unhas', label: 'Manicure Premium', category: 'unhas' }
   ];
 
-  const availableTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', 'Outro'];
+  const availableTimes = [...BOOKING_SLOTS, 'Outro'];
   const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -144,19 +146,19 @@ export default function BookingCalendar() {
       <div className="max-w-5xl mx-auto">
         
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-serif text-slate-50 mb-4">
-            Inicie seu <span className="text-yellow-500 italic">Projeto de Imagem</span>
+          <h2 className="text-3xl md:text-5xl font-serif text-zinc-100 mb-4">
+            Inicie seu <span className="text-[#D4AF37] italic">Projeto de Imagem</span>
           </h2>
-          <p className="text-slate-400">Atendimento exclusivo mediante agendamento e avaliação diagnóstica.</p>
+          <p className="text-zinc-400">Atendimento exclusivo mediante agendamento e avaliação diagnóstica.</p>
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden min-h-[500px]">
           
           {/* Barra de Progresso com 3 Passos */}
           <div className="flex items-center justify-center gap-4 mb-8 max-w-lg mx-auto">
-            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
-            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
-            <div className={`h-2 flex-1 rounded-full ${step >= 3 ? 'bg-yellow-500' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+            <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-[#D4AF37]' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+            <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-[#D4AF37]' : 'bg-zinc-800'} transition-colors duration-500`}></div>
+            <div className={`h-2 flex-1 rounded-full ${step >= 3 ? 'bg-[#D4AF37]' : 'bg-zinc-800'} transition-colors duration-500`}></div>
           </div>
 
           <AnimatePresence mode="wait">
@@ -164,7 +166,7 @@ export default function BookingCalendar() {
             {/* PASSO 1: ESCOLHA DE SERVIÇOS */}
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                <h3 className="text-2xl font-serif text-slate-50 mb-6 text-center">1. O que vamos transformar hoje?</h3>
+                <h3 className="text-2xl font-serif text-zinc-100 mb-6 text-center">1. O que vamos transformar hoje?</h3>
                 <p className="text-zinc-400 text-center text-sm mb-8">Selecione um ou mais serviços abaixo.</p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 max-w-4xl mx-auto">
@@ -174,18 +176,18 @@ export default function BookingCalendar() {
                       onClick={() => toggleService(service.id)}
                       className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${
                         selectedServices.includes(service.id) 
-                          ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500' 
-                          : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-zinc-600'
+                          ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' 
+                          : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-zinc-600'
                       }`}
                     >
-                      {selectedServices.includes(service.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5 text-zinc-600" />}
+                      {selectedServices.includes(service.id) ? <CheckSquare className="w-5 h-5 text-[#D4AF37]" /> : <Square className="w-5 h-5 text-zinc-600" />}
                       <span className="text-sm font-medium">{service.label}</span>
                     </button>
                   ))}
                 </div>
 
                 <div className="flex justify-center">
-                  <button onClick={handleNextStep} disabled={selectedServices.length === 0} className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center gap-3 transition-colors">
+                  <button onClick={handleNextStep} disabled={selectedServices.length === 0} className="bg-[#D4AF37] hover:bg-[#E8C95D] disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold uppercase tracking-wider py-3 px-8 rounded-lg flex items-center gap-3 transition-colors shadow-[0_0_20px_rgba(212,175,55,0.2)]">
                     Próximo Passo <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>
@@ -194,15 +196,19 @@ export default function BookingCalendar() {
 
             {/* PASSO 2: CALENDÁRIO */}
             {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-serif text-slate-50 capitalize">{meses[month]} {year}</h3>
+                    <h3 className="text-xl font-serif text-zinc-100 capitalize">{meses[month]} {year}</h3>
                     <div className="flex gap-2">
-                      <button onClick={prevMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500"><ChevronLeft className="w-5 h-5" /></button>
-                      <button onClick={nextMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-slate-400 hover:text-yellow-500"><ChevronRight className="w-5 h-5" /></button>
+                      <button onClick={prevMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-[#D4AF37]"><ChevronLeft className="w-5 h-5" /></button>
+                      <button onClick={nextMonth} className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-[#D4AF37]"><ChevronRight className="w-5 h-5" /></button>
                     </div>
                   </div>
+                  <p id="calendar-hours-note" className="flex items-center gap-2 text-xs text-zinc-400 mb-4">
+                    <Clock className="w-3.5 h-3.5 text-[#D4AF37]" /> Atendimento: {HOURS_SUMMARY.toLowerCase()}.
+                  </p>
                   <div className="grid grid-cols-7 gap-2 text-center mb-2">
                     {diasSemana.map(dia => <div key={dia} className="text-xs font-bold text-zinc-500 uppercase">{dia}</div>)}
                   </div>
@@ -211,12 +217,12 @@ export default function BookingCalendar() {
                     {days.map(day => {
                       const dateObj = new Date(year, month, day);
                       const isPast = dateObj < today;
-                      const isClosed = dateObj.getDay() === 0; 
+                      const isClosed = !isOpenDay(dateObj); 
                       const isDisabled = isPast || isClosed;
                       const isSelected = selectedDate && selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
 
                       return (
-                        <button key={day} onClick={() => !isDisabled && handleDayClick(day)} disabled={isDisabled} className={`p-2 rounded-lg text-sm font-medium w-full ${isDisabled ? 'text-zinc-700 cursor-not-allowed' : 'hover:border-yellow-500/50'} ${isSelected ? 'bg-yellow-500 text-zinc-950 font-bold' : (!isDisabled ? 'bg-zinc-950 border border-zinc-800 text-slate-300' : 'bg-transparent')}`}>
+                        <button key={day} onClick={() => !isDisabled && handleDayClick(day)} disabled={isDisabled} className={`p-2 rounded-lg text-sm font-medium w-full ${isDisabled ? 'text-zinc-700 cursor-not-allowed' : 'hover:border-[#D4AF37]/50'} ${isSelected ? 'bg-[#D4AF37] text-zinc-950 font-bold' : (!isDisabled ? 'bg-zinc-950 border border-zinc-800 text-zinc-300' : 'bg-transparent')}`}>
                           {day}
                         </button>
                       );
@@ -226,15 +232,15 @@ export default function BookingCalendar() {
 
                 <div className="flex flex-col">
                   <div className="flex items-center gap-3 mb-6">
-                    <Clock className="w-6 h-6 text-yellow-500" />
-                    <h3 className="text-xl font-serif text-slate-50">Horários Disponíveis</h3>
+                    <Clock className="w-6 h-6 text-[#D4AF37]" />
+                    <h3 className="text-xl font-serif text-zinc-100">Horários Disponíveis</h3>
                   </div>
                   {!selectedDate ? (
                     <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center text-zinc-500"><p>Selecione uma data ao lado.</p></div>
                   ) : isLoadingTimes ? (
                     <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-xl p-8 text-center">
                       <motion.p
-                        className="text-yellow-500 text-sm font-medium"
+                        className="text-[#D4AF37] text-sm font-medium"
                         animate={{ opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                       >
@@ -256,8 +262,8 @@ export default function BookingCalendar() {
                                 isBlocked
                                   ? 'bg-zinc-900 border-zinc-800 text-zinc-600 opacity-50 cursor-not-allowed'
                                   : isSelected
-                                    ? 'bg-yellow-500 border-yellow-500 text-zinc-950 font-bold'
-                                    : 'bg-zinc-950 border-zinc-800 text-slate-300 hover:border-yellow-500/50'
+                                    ? 'bg-[#D4AF37] border-[#D4AF37] text-zinc-950 font-bold'
+                                    : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-[#D4AF37]/50'
                               }`}
                             >
                               {isBlocked ? (
@@ -273,17 +279,21 @@ export default function BookingCalendar() {
                         })}
                       </div>
                       {selectedTime === 'Outro' && (
-                        <div className="bg-zinc-950 border border-yellow-500/30 p-4 rounded-lg mt-2">
-                          <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Qual horário prefere?</label>
-                          <input type="time" value={customTime} onChange={(e) => setCustomTime(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500 color-scheme-dark" />
+                        <div className="bg-zinc-950 border border-[#D4AF37]/30 p-4 rounded-lg mt-2">
+                          <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Qual horário prefere?</label>
+                          <input type="time" value={customTime} min={OPENING_TIME} max={CLOSING_TIME} onChange={(e) => setCustomTime(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] color-scheme-dark" />
+                          {customTime && !isWithinOpeningHours(customTime) && (
+                            <p className="text-xs text-red-400 mt-2">Escolha um horário de início a partir das {OPENING_TIME} e antes das {CLOSING_TIME}.</p>
+                          )}
                         </div>
                       )}
                     </div>
                   )}
                   <div className="mt-auto pt-8 flex justify-between">
-                    <button onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2"><ArrowLeft className="w-4 h-4" /> Voltar</button>
-                    <button onClick={handleNextStep} disabled={!selectedDate || !selectedTime || (selectedTime === 'Outro' && !customTime)} className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold py-3 px-6 rounded-lg flex items-center gap-2">Próximo Passo <ArrowRight className="w-5 h-5" /></button>
+                    <button onClick={handlePrevStep} className="text-zinc-400 hover:text-zinc-100 flex items-center gap-2 transition-colors"><ArrowLeft className="w-4 h-4" /> Voltar</button>
+                    <button onClick={handleNextStep} disabled={!selectedDate || !selectedTime || (selectedTime === 'Outro' && !isWithinOpeningHours(customTime))} className="bg-[#D4AF37] hover:bg-[#E8C95D] disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-colors shadow-[0_0_20px_rgba(212,175,55,0.2)]">Próximo Passo <ArrowRight className="w-5 h-5" /></button>
                   </div>
+                </div>
                 </div>
               </motion.div>
             )}
@@ -292,66 +302,90 @@ export default function BookingCalendar() {
             {step === 3 && (
               <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
                 
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6 flex items-start gap-4">
-                  <Info className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-4 mb-6 flex items-start gap-4">
+                  <Info className="w-6 h-6 text-[#D4AF37] flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-yellow-500 font-bold mb-1">Garantia de Agendamento</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">
-                      Para confirmar a sua reserva na agenda, solicitamos um pequeno **sinal financeiro** no momento do contato. Este valor será **integralmente abatido** do total no dia do seu procedimento.
+                    <h4 className="text-[#D4AF37] font-semibold text-sm mb-1">Garantia de Agendamento & Compromisso</h4>
+                    <p className="text-zinc-300 text-sm leading-relaxed">
+                      Para confirmar a sua reserva na agenda e dedicarmos o tempo exclusivo para o seu atendimento, solicitamos um pequeno <strong className="text-[#D4AF37] font-semibold">sinal financeiro</strong> no momento do contato pelo WhatsApp. Este valor é <strong className="text-[#D4AF37] font-semibold">integralmente abatido</strong> do total no dia do seu procedimento.
                     </p>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  <h3 className="text-xl font-serif text-slate-50 border-b border-zinc-800 pb-2 mb-4">Dados Principais</h3>
+                  <h3 className="text-xl font-serif text-zinc-100 border-b border-zinc-800 pb-2 mb-4">Dados Principais</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="text" name="nome" required onChange={handleChange} placeholder="Seu Nome Completo" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
-                    <input type="number" name="idade" required onChange={handleChange} placeholder="Sua Idade" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                    <div>
+                      <label htmlFor="booking-nome" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Nome Completo</label>
+                      <input id="booking-nome" type="text" name="nome" required onChange={handleChange} placeholder="Como prefere ser chamada(o)?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors" />
+                    </div>
+                    <div>
+                      <label htmlFor="booking-idade" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Idade</label>
+                      <input id="booking-idade" type="number" name="idade" required onChange={handleChange} placeholder="Sua idade" min="1" max="120" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors" />
+                    </div>
                   </div>
-                  <input type="text" name="alergias" required onChange={handleChange} placeholder="Possui alguma alergia? (Cosméticos, amônia, esmaltes...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                  <div>
+                    <label htmlFor="booking-alergias" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Alergias ou Sensibilidades</label>
+                    <input id="booking-alergias" type="text" name="alergias" required onChange={handleChange} placeholder="Cosméticos, amônia, esmaltes, látex... (ou digite 'Nenhuma')" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors" />
+                  </div>
 
                   {/* CAMPOS DINÂMICOS */}
                   {(hasCabelo || hasRosto || hasUnhas) && (
-                    <h3 className="text-xl font-serif text-slate-50 border-b border-zinc-800 pb-2 mt-8 mb-4">Ficha Clínica Específica</h3>
+                    <h3 className="text-xl font-serif text-zinc-100 border-b border-zinc-800 pb-2 mt-8 mb-4">Ficha Diagnóstica Personalizada</h3>
                   )}
                   
                   {hasCabelo && (
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Histórico Capilar</label>
-                      <textarea name="historicoCabelo" rows="2" required onChange={handleChange} placeholder="Químicas feitas nos últimos 2 anos (Progressiva, tintura, relaxamento...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500"></textarea>
+                      <label htmlFor="booking-cabelo" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Histórico Capilar (últimos 2 anos)</label>
+                      <textarea id="booking-cabelo" name="historicoCabelo" rows="2" required onChange={handleChange} placeholder="Descoloração, progressiva, botox, relaxamento, colorações ou transição capilar..." className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors"></textarea>
                     </div>
                   )}
 
                   {hasRosto && (
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Pele & Rosto</label>
-                      <input type="text" name="historicoPele" required onChange={handleChange} placeholder="Usa ácidos no rosto ou possui micropigmentação?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                      <label htmlFor="booking-pele" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Pele & Rosto</label>
+                      <input id="booking-pele" type="text" name="historicoPele" required onChange={handleChange} placeholder="Uso recente de ácidos, micropigmentação ou procedimentos faciais?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors" />
                     </div>
                   )}
 
                   {hasUnhas && (
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Saúde das Unhas</label>
-                      <input type="text" name="historicoUnhas" required onChange={handleChange} placeholder="Alguma sensibilidade ou histórico de micose?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-slate-50 focus:border-yellow-500" />
+                      <label htmlFor="booking-unhas" className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Saúde das Unhas</label>
+                      <input id="booking-unhas" type="text" name="historicoUnhas" required onChange={handleChange} placeholder="Sensibilidade, micose, unhas frágeis ou alergias específicas?" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-zinc-100 focus:border-[#D4AF37] focus:outline-none transition-colors" />
                     </div>
                   )}
 
                   <div className="mt-6 pt-6 border-t border-zinc-800">
-                    <label className="block text-sm font-bold text-slate-300 mb-3">Você autoriza o uso da sua imagem para nosso portfólio no Instagram?</label>
-                    <div className="flex gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200">
-                        <input type="radio" name="autorizaImagem" value="Sim" onChange={handleChange} className="accent-yellow-500" required /> Sim
+                    <label className="block text-sm font-semibold text-zinc-300 mb-3">Você autoriza o registro fotográfico antes/depois para nosso portfólio no Instagram?</label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-zinc-200">
+                        <input type="radio" name="autorizaImagem" value="Sim" onChange={handleChange} className="accent-[#D4AF37]" required /> Sim, com prazer
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200">
-                        <input type="radio" name="autorizaImagem" value="Não" onChange={handleChange} className="accent-yellow-500" required /> Não
+                      <label className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-zinc-200">
+                        <input type="radio" name="autorizaImagem" value="Não" onChange={handleChange} className="accent-[#D4AF37]" required /> Prefiro não divulgar
                       </label>
                     </div>
                   </div>
 
+                  {/* LGPD Consent */}
+                  <div className="p-4 rounded-lg bg-zinc-950/70 border border-zinc-800">
+                    <label className="flex items-start gap-3 cursor-pointer text-xs text-zinc-400 leading-relaxed">
+                      <input type="checkbox" required name="concordaTermos" className="mt-0.5 accent-[#D4AF37] rounded" />
+                      <span>
+                        Concordo com o envio das minhas informações diagnósticas via WhatsApp para planejamento do atendimento no Studio Drika Santana, em conformidade com a LGPD e os{' '}
+                        <Link to="/termos" target="_blank" className="text-[#D4AF37] underline hover:text-[#E8C95D]">
+                          Termos de Uso e Política de Privacidade
+                        </Link>.
+                      </span>
+                    </label>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4">
-                    <button type="button" onClick={handlePrevStep} className="text-slate-400 hover:text-slate-50 flex items-center gap-2"><ArrowLeft className="w-4 h-4" /> Voltar</button>
-                    <button type="submit" className="bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold uppercase py-3 px-8 rounded-lg flex items-center justify-center gap-3 w-full sm:w-auto">
-                      Enviar Ficha e Agendar <Send className="w-5 h-5" />
+                    <button type="button" onClick={handlePrevStep} className="text-zinc-400 hover:text-zinc-100 flex items-center gap-2 transition-colors">
+                      <ArrowLeft className="w-4 h-4" /> Voltar
+                    </button>
+                    <button type="submit" className="bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 font-bold uppercase tracking-wider py-3.5 px-8 rounded-lg flex items-center justify-center gap-3 w-full sm:w-auto shadow-[0_0_25px_rgba(212,175,55,0.25)] transition-all">
+                      Enviar Ficha e Agendar <Send className="w-4 h-4" />
                     </button>
                   </div>
                 </form>

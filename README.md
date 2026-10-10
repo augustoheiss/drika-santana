@@ -1,8 +1,18 @@
 # Drika Santana — Studio de Embelezamento
 
-Landing page moderna, responsiva e de alta conversão.
+Aplicação web moderna, acolhedora e de alta conversão para o Studio de Embelezamento e Visagismo Drika Santana (Itaquera, São Paulo).
 
-**Stack:** Vite · React 18 · Tailwind CSS · Framer Motion · Lucide React
+**Stack:** React 19 · Vite 7 · Tailwind CSS 4 · Framer Motion 12 · Lucide React
+
+**Hospedagem:** Vercel — [drikasantana.vercel.app](https://drikasantana.vercel.app)
+
+---
+
+## Horário de Atendimento
+
+Configurado de forma centralizada em `src/config/businessHours.js`:
+- **Quarta a Sábado:** 09:00 às 18:00
+- **Domingo a Terça:** Fechado
 
 ---
 
@@ -19,44 +29,37 @@ npm run dev
 npm run build
 ```
 
-## Deploy no GitHub Pages
+---
 
-```bash
-# 1. Build do projeto
-npm run build
-
-# 2. Publique a pasta `dist/` na branch `gh-pages`
-#    (use gh-pages package ou GitHub Actions)
-npm install -D gh-pages
-
-# Adicione no package.json > scripts:
-# "deploy": "gh-pages -d dist"
-
-npm run build
-npm run deploy
-```
-
-> **Atenção:** O `vite.config.js` já está configurado com `base: '/drika-santana/'` para o GitHub Pages. Ajuste o nome do repositório se necessário.
-
-## Estrutura de componentes
+## Estrutura do Projeto
 
 ```
 src/
-├── assets/
-│   └── logo.png
+├── assets/             # Imagens e logotipos oficiais
+├── config/
+│   └── businessHours.js # Fonte única de verdade de horários de funcionamento
 ├── components/
-│   ├── Hero.jsx            # Primeira dobra com CTA
-│   ├── Manifesto.jsx       # Filosofia da marca + bio da Drika
-│   ├── Services.jsx        # Grid de 8 serviços
-│   ├── BookingCalendar.jsx # Calendário interativo → WhatsApp
-│   └── Footer.jsx          # Rodapé com localização e contatos
+│   ├── BookingCalendar.jsx # Calendário de agendamento em 3 etapas com anamnese
+│   ├── FAQ.jsx             # Dúvidas frequentes acolhedoras e acessíveis
+│   ├── Footer.jsx          # Rodapé com horários, mapa e contatos
+│   ├── Navbar.jsx          # Navegação responsiva com link de agendamento
+│   ├── WhatsAppFloat.jsx   # Botão flutuante de atendimento rápido
+│   └── VisagismImpact.jsx  # Seção de impacto do visagismo
+├── pages/
+│   ├── Home.jsx            # Página inicial com método, acolhimento e depoimentos
+│   ├── Sobre.jsx           # Trajetória, formação técnica e lado pessoal
+│   ├── Servicos.jsx        # Menu de serviços detalhados e galeria em movimento
+│   ├── Aprenda.jsx         # Hub de aprendizado e dicas de cuidados em casa
+│   ├── Avaliacoes.jsx      # Depoimentos reais verificados do Google
+│   ├── Contato.jsx         # Agendamento e localização
+│   └── Termos.jsx          # Termos de Uso e Política de Privacidade (LGPD)
 ├── App.jsx
 ├── main.jsx
 └── index.css
 ```
 
-## WhatsApp
+---
 
-Número configurado: `+55 11 98746-6027`
+## WhatsApp Oficial
 
-Para alterar, edite a constante `WHATSAPP_NUMBER` em `BookingCalendar.jsx`.
+Número de atendimento: `+55 (11) 97846-6027`

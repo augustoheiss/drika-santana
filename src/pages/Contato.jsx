@@ -1,10 +1,18 @@
 import { motion } from 'framer-motion'
-import { CalendarCheck, Star } from 'lucide-react'
+import { CalendarCheck, Star, Clock } from 'lucide-react'
 import BookingCalendar from '../components/BookingCalendar'
+import FAQ from '../components/FAQ'
+import Seo from '../components/Seo'
+import { HOURS_SUMMARY } from '../config/businessHours'
 
 export default function Contato() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
+      <Seo
+        title="Agendamento & Contato — Drika Santana Studio"
+        description="Agende seu diagnóstico de imagem e corte com a Drika em Itaquera. Horário: Quarta a Sábado, das 9h às 18h."
+        canonicalUrl="https://drikasantana.vercel.app/contato"
+      />
 
       {/* ── Elegant header ── */}
       <section className="relative py-20 px-6 border-b border-zinc-900 overflow-hidden text-center">
@@ -39,11 +47,22 @@ export default function Contato() {
             O atendimento é <strong className="text-zinc-200 font-medium">exclusivo</strong> e mediante{' '}
             <strong className="text-zinc-200 font-medium">avaliação diagnóstica</strong>.
           </p>
+
+          <p
+            id="contato-horario-atendimento"
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 text-sm text-zinc-300"
+          >
+            <Clock size={14} className="text-[#D4AF37]" />
+            {HOURS_SUMMARY}
+          </p>
         </motion.div>
       </section>
 
       {/* ── BookingCalendar ── */}
       <BookingCalendar />
+
+      {/* ── FAQ ── */}
+      <FAQ className="border-t border-zinc-900 bg-zinc-900/10" />
     </div>
   )
 }

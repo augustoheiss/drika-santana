@@ -15,6 +15,7 @@ import {
   OctagonX,
 } from 'lucide-react'
 import fotoDrika from '../assets/drikahair-02.jpg'
+import Seo from '../components/Seo'
 
 const especialidades = [
   {
@@ -59,6 +60,11 @@ const itemVariants = {
 export default function Sobre() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-16">
+      <Seo
+        title="Sobre a Drika — Adriana Santana | Visagismo & Estudo Contínuo"
+        description="Conheça Adriana Santana (Drika): especialista em visagismo, corte a seco para cacheados, cortes de precisão e atendimento personalizado com acolhimento em Itaquera."
+        canonicalUrl="https://drikasantana.vercel.app/sobre"
+      />
 
       {/* ── Page header ── */}
       <section className="relative py-20 px-6 border-b border-zinc-900 overflow-hidden">
@@ -138,8 +144,14 @@ export default function Sobre() {
               </div>
               <div className="space-y-3 text-zinc-400 text-sm font-light leading-relaxed">
                 <p>
-                  Apaixonada pela área da beleza e autoestima, amo viajar, aprender coisas novas e <span className="text-zinc-200 italic">hablo español!</span>
+                  Apaixonada pela arte da beleza e pelo bem-estar das pessoas, amo viajar, explorar novas culturas e aprender continuamente.
                 </p>
+                <div className="p-3 my-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded flex items-center gap-2.5">
+                  <span className="text-base">🇪🇸</span>
+                  <p className="text-xs text-[#D4AF37] font-medium leading-relaxed">
+                    <strong>¡Atención en español!</strong> Sea muy bienvenido(a). Realizamos atención personalizada también para la comunidad hispanohablante.
+                  </p>
+                </div>
                 <p className="flex items-start gap-2">
                   <Globe size={14} className="text-[#D4AF37] flex-shrink-0 mt-0.5" />
                   Em toda a minha trajetória, coloco <strong className="text-zinc-200 font-medium">Jeová Deus em primeiro lugar</strong>{' '}
@@ -208,7 +220,7 @@ export default function Sobre() {
         </div>
       </section>
 
-      {/* ── Expert vs Amateur contrast ── */}
+      {/* ── Expert vs Standardization contrast ── */}
       <section className="py-24 px-6 md:px-12 border-t border-zinc-900 overflow-hidden">
         <div className="max-w-6xl mx-auto">
 
@@ -219,10 +231,10 @@ export default function Sobre() {
             transition={{ duration: 0.7 }}
             className="mb-14"
           >
-            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-medium">Qualificações</span>
+            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-medium">Filosofia Profissional</span>
             <h2 className="font-serif text-3xl md:text-5xl text-zinc-50 mt-3 leading-tight">
-              A diferença entre <span className="text-[#D4AF37] italic">quem estuda</span><br />
-              e quem improvisa.
+              A diferença entre <span className="text-[#D4AF37] italic">estudo técnico</span><br />
+              e fórmulas padronizadas.
             </h2>
           </motion.div>
 
@@ -234,10 +246,10 @@ export default function Sobre() {
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.85, ease: 'easeOut' }}
-              className="group relative bg-zinc-800 border border-zinc-700 hover:border-[#D4AF37]/40 transition-all duration-300 overflow-hidden"
+              className="group relative bg-zinc-900 border border-zinc-700 hover:border-[#D4AF37]/50 transition-all duration-300 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent" />
 
               <div className="relative overflow-hidden">
                 <img
@@ -245,7 +257,7 @@ export default function Sobre() {
                   alt="Profissional dedicada ao aprendizado e à técnica"
                   className="w-full h-60 object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-800 via-zinc-800/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/20 to-transparent" />
               </div>
 
               <div className="p-7">
@@ -253,56 +265,55 @@ export default function Sobre() {
                   <div className="p-2.5 bg-zinc-950 border border-[#D4AF37]/30 group-hover:border-[#D4AF37]/60 transition-colors">
                     <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
                   </div>
-                  <span className="text-[#D4AF37] text-xs tracking-[0.25em] uppercase font-semibold">Especialista</span>
+                  <span className="text-[#D4AF37] text-xs tracking-[0.25em] uppercase font-semibold">Técnica & Visagismo</span>
                 </div>
                 <p className="text-zinc-300 text-sm font-light leading-relaxed mb-7">
-                  Invista em quem investe seu tempo para aprender o padrão de beleza do Universo
-                  desenhado em cada pessoa, focada em mostrar a{' '}
-                  <strong className="text-zinc-100 font-medium">autoridade correta</strong> para você.
+                  Invista em quem dedica tempo e estudo constante para decodificar o padrão de beleza natural único de cada pessoa, projetando cortes e cores que valorizam a sua essência com total respeito à saúde do fio.
                 </p>
                 <Link
                   to="/contato"
                   className="inline-flex items-center gap-2 text-[#D4AF37] text-xs tracking-widest uppercase font-semibold hover:gap-3.5 transition-all duration-200"
                 >
-                  Agendar agora com quem estuda
+                  Agendar com quem estuda seu formato
                   <ArrowRight size={13} />
                 </Link>
               </div>
             </motion.div>
 
-            {/* ── Amateur card ── */}
+            {/* ── Padronização card ── */}
             <motion.div
               initial={{ opacity: 0, x: 30, scale: 0.97 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.85, ease: 'easeOut', delay: 0.15 }}
-              className="group relative bg-zinc-900 border border-zinc-800 hover:border-red-500/20 transition-all duration-300 overflow-hidden"
+              className="group relative bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-red-950/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
-
               <div className="relative overflow-hidden">
                 <img
                   src="/images/papeis-02.jpg"
-                  alt="Amador negligenciando o aprendizado"
-                  className="w-full h-60 object-cover transition-all duration-700 group-hover:scale-[1.03] opacity-60 saturate-[0.4]"
+                  alt="Risco de cortes padronizados e sem diagnóstico"
+                  className="w-full h-60 object-cover transition-all duration-700 group-hover:scale-[1.03] opacity-60 saturate-[0.5]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/20 to-transparent" />
-                <div className="absolute inset-0 bg-red-950/15" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
               </div>
 
               <div className="p-7">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 bg-zinc-950 border border-red-500/20 group-hover:border-red-500/40 transition-colors">
-                    <OctagonX className="w-5 h-5 text-red-500" />
+                  <div className="p-2.5 bg-zinc-950 border border-zinc-700 transition-colors">
+                    <OctagonX className="w-5 h-5 text-zinc-400" />
                   </div>
-                  <span className="text-red-400/70 text-xs tracking-[0.25em] uppercase font-semibold">Amador</span>
+                  <span className="text-zinc-400 text-xs tracking-[0.25em] uppercase font-semibold">Fórmulas Prontas</span>
                 </div>
-                <p className="text-zinc-500 text-sm font-light leading-relaxed">
-                  Fugindo do equilíbrio: Enquanto alguns buscam o aprendizado, amadores perdem
-                  tempo com distrações e negligenciam a{' '}
-                  <span className="text-zinc-600 italic">engenharia de imagem</span>.
+                <p className="text-zinc-400 text-sm font-light leading-relaxed mb-7">
+                  Cortes copiados de redes sociais sem análise anatômica e sem escuta atenta geram frustração diária. Quando o procedimento ignora sua rotina, o cabelo torna-se refém de horas de secador e finalizadores.
                 </p>
+                <Link
+                  to="/servicos"
+                  className="inline-flex items-center gap-2 text-zinc-300 hover:text-[#D4AF37] text-xs tracking-widest uppercase font-semibold transition-colors"
+                >
+                  Conheça o nosso método diferenciado
+                  <ArrowRight size={13} />
+                </Link>
               </div>
             </motion.div>
 
@@ -310,8 +321,8 @@ export default function Sobre() {
         </div>
       </section>
 
-      {/* ── Certificates section ── */}
-      <section className="py-24 px-6 md:px-12 border-t border-zinc-900">
+      {/* ── Pillars of Excellence section ── */}
+      <section className="py-24 px-6 md:px-12 border-t border-zinc-900 bg-zinc-900/20">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -320,13 +331,13 @@ export default function Sobre() {
             transition={{ duration: 0.7 }}
             className="mb-14"
           >
-            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-medium">Formação</span>
+            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-medium">Formação Contínua</span>
             <h2 className="font-serif text-3xl md:text-5xl text-zinc-50 mt-3 leading-tight">
-              Minhas Qualificações<br />
-              <span className="text-[#D4AF37] italic">e Certificados</span>
+              Pilares de Estudo<br />
+              <span className="text-[#D4AF37] italic">& Especialização</span>
             </h2>
-            <p className="text-zinc-500 text-sm font-light mt-4 max-w-xl leading-relaxed">
-              Cada diploma representa horas de dedicação e atualização constante. Em breve, os certificados completos estarão disponíveis aqui.
+            <p className="text-zinc-400 text-sm font-light mt-4 max-w-2xl leading-relaxed">
+              Cada atendimento no Studio é respaldado por formações profundas e atualizações periódicas. O domínio da técnica é o que garante resultados previsíveis, saudáveis e seguros.
             </p>
           </motion.div>
 
@@ -335,27 +346,47 @@ export default function Sobre() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
-            {certificados.map((n) => (
+            {[
+              {
+                title: 'Visagismo Prático & Harmonia Facial',
+                desc: 'Estudo das proporções do rosto, linhas de força e psicologia da imagem para valorizar traços naturais.',
+              },
+              {
+                title: 'Colorimetria Avançada & Neutralização',
+                desc: 'Matemática das cores, fundo de clareamento e preservação das pontes de hidrogênio e cistina do fio.',
+              },
+              {
+                title: 'Dry Cut para Crespas & Cacheadas',
+                desc: 'Escultura capilar a seco com respeito ao fator de encolhimento e à distribuição tridimensional dos cachos.',
+              },
+              {
+                title: 'Geometria de Precisão: Chanel & Long Bob',
+                desc: 'Cortes com caimento de alta precisão e acabamento editorial de facílima manutenção no dia a dia.',
+              },
+              {
+                title: 'Tricologia & Saúde do Couro Cabeludo',
+                desc: 'Cronogramas capilares de alta performance para recuperar cutícula, córtex e elasticidade saudável.',
+              },
+              {
+                title: 'Biossegurança & Protocolos Esterilizados',
+                desc: 'Higiene rigorosa, autoclave e esterilização de grau hospitalar em todos os instrumentos e materiais.',
+              },
+            ].map((pilar, idx) => (
               <motion.div
-                key={n}
+                key={pilar.title}
                 variants={itemVariants}
-                className="group relative aspect-[4/3] border border-dashed border-zinc-700 bg-zinc-900/20 hover:border-[#D4AF37]/40 hover:bg-zinc-900/50 transition-all duration-300 flex flex-col items-center justify-center gap-3 overflow-hidden"
+                className="group relative p-6 border border-zinc-800 bg-zinc-950/70 hover:border-[#D4AF37]/40 hover:bg-zinc-900/50 transition-all duration-300 flex flex-col justify-between"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Award
-                  size={32}
-                  className="text-zinc-700 group-hover:text-[#D4AF37]/50 transition-colors duration-300"
-                />
-                <div className="text-center">
-                  <p className="text-zinc-600 text-xs tracking-[0.2em] uppercase font-medium group-hover:text-zinc-500 transition-colors">
-                    Certificado
-                  </p>
-                  <p className="text-zinc-700 text-[11px] mt-0.5 font-light">Em breve</p>
-                </div>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Plus size={14} className="text-[#D4AF37]/40" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/0 to-transparent group-hover:via-[#D4AF37]/40 transition-all duration-500" />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-serif text-xs font-bold text-[#D4AF37]/60 tracking-wider">0{idx + 1}</span>
+                    <Award size={18} className="text-[#D4AF37]/70 group-hover:text-[#D4AF37] transition-colors" />
+                  </div>
+                  <h3 className="font-serif text-base text-zinc-100 font-medium mb-2 leading-snug">{pilar.title}</h3>
+                  <p className="text-zinc-500 text-xs font-light leading-relaxed">{pilar.desc}</p>
                 </div>
               </motion.div>
             ))}
