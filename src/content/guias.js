@@ -1,6 +1,6 @@
 /**
  * Hub de Conteúdo Educativo — Drika Santana Studio
- * Fonte de verdade para guias práticos, glossário capilar e rotinas de autocuidado.
+ * Fonte de verdade para guias práticos, glossário capilar, mitos de café e rotinas de autocuidado.
  * Permite que a Drika e a equipe editem textos sem tocar na camada de layout.
  */
 
@@ -21,6 +21,10 @@ export const guias = [
       'Entenda como cortar o fio seco no seu caimento natural evita surpresas e garante o volume e a definição que você sempre quis.',
     tempoLeitura: '3 min',
     destaque: true,
+    servicoRelacionadoId: 'drycut',
+    servicoRelacionadoLabel: 'Agendar Dry Cut (Corte a Seco)',
+    whatsappDuvida:
+      'Oi Drika! ☕ Acabei de ler o seu guia sobre Dry Cut (Corte a Seco) no site e quero conversar sobre os meus cachos/crespo!',
     passos: [
       {
         titulo: 'O que é o Dry Cut?',
@@ -49,6 +53,10 @@ export const guias = [
       'Passo a passo simples para manter a definição e o brilho dos cachos por dias sem pesar os fios.',
     tempoLeitura: '4 min',
     destaque: false,
+    servicoRelacionadoId: 'drycut',
+    servicoRelacionadoLabel: 'Agendar Corte & Orientação de Cachos',
+    whatsappDuvida:
+      'Oi Drika! ☕ Li o seu guia de Day After no site e queria sua ajuda para melhorar a definição e o corte dos meus cachos!',
     passos: [
       {
         titulo: '1. A Proteção Noturna é Inegociável',
@@ -77,6 +85,10 @@ export const guias = [
       'Como passar pelo processo com autoestima preservada, truques de texturização e o momento certo do Big Chop.',
     tempoLeitura: '4 min',
     destaque: false,
+    servicoRelacionadoId: 'drycut',
+    servicoRelacionadoLabel: 'Agendar Corte de Transição / Acolhimento',
+    whatsappDuvida:
+      'Oi Drika! ☕ Estou passando pela transição capilar, li o guia no seu site e gostaria de agendar um momento com você para cuidar do meu cabelo sem pressa!',
     passos: [
       {
         titulo: 'Paciência e Acolhimento',
@@ -105,6 +117,10 @@ export const guias = [
       'Por que esses cortes clássicos nunca saem de moda e como mantê-los alinhados com o mínimo de esforço em casa.',
     tempoLeitura: '3 min',
     destaque: true,
+    servicoRelacionadoId: 'chanel-longbob',
+    servicoRelacionadoLabel: 'Agendar Chanel de Bico ou Long Bob',
+    whatsappDuvida:
+      'Oi Drika! ☕ Li o seu guia sobre Chanel de Bico e Long Bob no site! Quero muito um corte geométrico que fique lindo e fácil de arrumar no dia a dia.',
     passos: [
       {
         titulo: 'A Geometria a Favor do Rosto',
@@ -133,6 +149,10 @@ export const guias = [
       'Descubra a temperatura segura para modelar e por que pular o protetor térmico destrói as proteínas do fio.',
     tempoLeitura: '3 min',
     destaque: false,
+    servicoRelacionadoId: 'tratamento',
+    servicoRelacionadoLabel: 'Agendar Tratamento & Recuperação Térmica',
+    whatsappDuvida:
+      'Oi Drika! ☕ Li o guia sobre Proteção Térmica no site e quero recuperar a saúde e o brilho das pontas do meu cabelo!',
     passos: [
       {
         titulo: 'O que o Calor Excessivo Faz no Fio?',
@@ -161,6 +181,10 @@ export const guias = [
       'A garantia absoluta de que seu cabelo suportará o processo químico com saúde, elasticidade e sem surpresas.',
     tempoLeitura: '3 min',
     destaque: true,
+    servicoRelacionadoId: 'colorimetria',
+    servicoRelacionadoLabel: 'Agendar Colorimetria com Teste de Mecha',
+    whatsappDuvida:
+      'Oi Drika! ☕ Li o seu guia sobre o Teste de Mecha e amei o cuidado com a saúde do fio. Quero agendar uma avaliação para iluminar/colorir meu cabelo!',
     passos: [
       {
         titulo: 'O que Avaliamos no Teste de Mecha?',
@@ -189,6 +213,10 @@ export const guias = [
       'Como o equilíbrio do pH restaura o toque sedoso e retém os tratamentos dentro da fibra capilar.',
     tempoLeitura: '4 min',
     destaque: false,
+    servicoRelacionadoId: 'tratamento',
+    servicoRelacionadoLabel: 'Agendar Acidificação & Cronograma Capilar',
+    whatsappDuvida:
+      'Oi Drika! ☕ Li sobre a Acidificação Capilar no seu site e acho que meu cabelo está poroso precisando desse cuidado. Podemos conversar?',
     passos: [
       {
         titulo: 'O pH do Cabelo Saudável',
@@ -208,6 +236,41 @@ export const guias = [
     ],
     dicaDrika:
       'Não faça misturinhas caseiras descontroladas (como vinagre puro em excesso). Utilize acidificantes profissionais com formulação balanceada.',
+  },
+]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAPO DE CAFÉ & BAR: MITOS DE SALÃO vs. A VERDADE SINCERA DA DRIKA
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const mitosDeCafe = [
+  {
+    id: 'mito-lua',
+    mito: '"Cortar na lua cheia faz o cabelo crescer o dobro e mais grosso?"',
+    papoReto:
+      'Olha, se a gente estivesse tomando um café agora eu te diria rindo: a lua mexe com a maré do oceano, linda, não com o seu bulbo capilar! O que faz o cabelo crescer forte e encorpado é couro cabeludo limpo, boa alimentação e aparar as pontas danificadas para o fio parar de quebrar no comprimento.',
+    cienciaCurta: 'O crescimento capilar (~1 a 1,2 cm/mês) é determinado pela genética, vascularização folicular e metabolismo, não pelas fases lunares.',
+  },
+  {
+    id: 'mito-progressiva-trata',
+    mito: '"Progressiva ou botox com prancha quente estão hidratando meu fio?"',
+    papoReto:
+      'Papo reto de amiga que te ama: aquele brilho espelhado no primeiro dia é uma película selada a ferro quente, não saúde! Por baixo, o pH ácido extremo e a chapinha a 230°C podem afinar o córtex e deixar o fio rígido. Se você faz alisamento, o cronograma de reposição lipídica é lei para o fio não partir.',
+    cienciaCurta: 'Alisamentos ácidos alteram pontes da fibra sob alta temperatura, reduzindo a permeabilidade à água se não houver tratamento contínuo.',
+  },
+  {
+    id: 'mito-cacheada-curto',
+    mito: '"Quem tem cabelo cacheado ou crespo não pode usar corte curto ou franja?"',
+    papoReto:
+      'Mentira que inventaram porque tinham medo de cortar no seco! Cacho curto, Chanel cacheado e franja com curvatura ficam um espetáculo quando a gente respeita o fator de encolhimento de cada mecha no Dry Cut. O problema nunca foi o seu cacho, foi a tesoura no cabelo molhado!',
+    cienciaCurta: 'Ao esculpir o cacho em repouso (seco), desenhamos a silhueta real ao redor das maçãs do rosto e da mandíbula.',
+  },
+  {
+    id: 'mito-agua-fria',
+    mito: '"Preciso passar frio lavando o cabelo na água gelada no inverno de São Paulo?"',
+    papoReto:
+      'De jeito nenhum! Ninguém merece bater queixo no chuveiro achando que água congelando faz milagre. O segredo é fugir da água pelando (que arranca a proteção natural do couro cabeludo). Água morna agradável + um bom finalizador ou acidificante já deixam as cutículas seladas e felizes!',
+    cienciaCurta: 'O que sela a cutícula de forma efetiva é o pH ácido dos condicionadores e acidificantes (pH 3.5 a 4.5), não o choque térmico gelado.',
   },
 ]
 

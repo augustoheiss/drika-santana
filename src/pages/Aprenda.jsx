@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   BookOpen,
   Search,
@@ -15,8 +15,17 @@ import {
   Droplets,
   Shield,
   Moon,
+  Coffee,
+  MessageCircle,
 } from 'lucide-react'
-import { categoriasGuia, guias, glossarioCapilar, dicasRapidas } from '../content/guias'
+import {
+  categoriasGuia,
+  guias,
+  glossarioCapilar,
+  dicasRapidas,
+  mitosDeCafe,
+} from '../content/guias'
+import { buildWhatsAppUrl } from '../config/servicesCatalog'
 import Media from '../components/Media'
 import Seo from '../components/Seo'
 
@@ -28,9 +37,38 @@ const iconMap = {
 }
 
 export default function Aprenda() {
-  const [selectedCategory, setSelectedCategory] = useState('todos')
+  const [searchParams] = useSearchParams()
+  const guiaParam = searchParams.get('guia')
+  const categoriaParam = searchParams.get('categoria')
+
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    if (categoriaParam && categoriasGuia.some((c) => c.id === categoriaParam)) {
+      return categoriaParam
+    }
+    return 'todos'
+  })
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedGuideId, setExpandedGuideId] = useState(null)
+  const [expandedGuideId, setExpandedGuideId] = useState(() => {
+    if (guiaParam && guias.some((g) => g.id === guiaParam)) {
+      return guiaParam
+    }
+    return guias[0]?.id || null
+  })
+
+  // Synchronize URL query parameters when navigating from /servicos or BookingCalendar
+  useEffect(() => {
+    if (guiaParam && guias.some((g) => g.id === guiaParam)) {
+      setSelectedCategory('todos')
+      setExpandedGuideId(guiaParam)
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`guia-${guiaParam}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [guiaParam])
 
   // Filter guides based on category and search query
   const filteredGuias = useMemo(() => {
@@ -69,8 +107,8 @@ export default function Aprenda() {
   return (
     <div className="bg-zinc-950 min-h-screen pt-20">
       <Seo
-        title="Aprenda com a Drika — Guias e Autocuidado Capilar"
-        description="Aprenda a cuidar do seu cabelo com autonomia: guias para crespos e cacheados, cortes geométricos, rotina de day after, teste de mecha e glossário capilar."
+        title="Aprenda com a Drika — Guias, Papo de Café e Autocuidado Capilar"
+        description="Aprenda a cuidar do seu cabelo num papo sincero e bem-humorado: guias para crespos e cacheados, cortes geométricos, day after, teste de mecha e mitos de salão."
         canonicalUrl="https://drikasantana.vercel.app/aprenda"
       />
       {/* ── Page Header ── */}
@@ -98,9 +136,9 @@ export default function Aprenda() {
           </h1>
 
           <p className="text-zinc-300 text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto">
-            Acreditamos que o conhecimento liberta. Aqui você encontra guias práticos,
-            explicações técnicas sem complicação e o passo a passo para cuidar do seu
-            cabelo com carinho e independência em casa.
+            Conhecimento de verdade não precisa ser chato nem complicado. Puxe uma cadeira, pegue
+            seu café e descubra como seu cabelo funciona — numa conversa sincera, leve e sem
+            segredos escondidos.
           </p>
         </motion.div>
       </section>
@@ -143,7 +181,7 @@ export default function Aprenda() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full text-xs tracking-wider uppercase transition-all duration-300 font-medium ${
+                  className={`px-4 py-2 rounded-full text-xs tracking-wider uppercase transition-all duration-300 font-medium cursor-pointer ${
                     active
                       ? 'bg-[#D4AF37] text-zinc-950 shadow-[0_0_20px_rgba(212,175,55,0.3)] font-semibold'
                       : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700'
@@ -204,9 +242,14 @@ export default function Aprenda() {
 
                   return (
                     <motion.article
+                      id={`guia-${guia.id}`}
                       key={guia.id}
                       layout
-                      className="border border-zinc-800 bg-zinc-900/40 rounded-sm overflow-hidden hover:border-zinc-700 transition-colors"
+                      className={`border rounded-sm overflow-hidden transition-colors ${
+                        isExpanded
+                          ? 'border-[#D4AF37]/50 bg-zinc-900/60 shadow-[0_0_30px_rgba(212,175,55,0.08)]'
+                          : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700'
+                      }`}
                     >
                       <button
                         onClick={() => toggleGuide(guia.id)}
@@ -276,7 +319,7 @@ export default function Aprenda() {
 
                             {/* Dica de Ouro da Drika */}
                             {guia.dicaDrika && (
-                              <div className="p-4 rounded bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-start gap-3">
+                              <div className="p-4 rounded bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-start gap-3 mb-6">
                                 <Lightbulb size={18} className="text-[#D4AF37] shrink-0 mt-0.5" />
                                 <div>
                                   <p className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] mb-1">
@@ -288,6 +331,35 @@ export default function Aprenda() {
                                 </div>
                               </div>
                             )}
+
+                            {/* Contextual Action Bridge: Guide -> Pre-selected Booking or WhatsApp */}
+                            <div className="pt-5 border-t border-zinc-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                              <p className="text-xs text-zinc-400 font-light">
+                                Quer viver esse cuidado na prática com a Drika?
+                              </p>
+                              <div className="flex flex-wrap items-center gap-3">
+                                {guia.servicoRelacionadoId && (
+                                  <Link
+                                    to={`/contato?servico=${guia.servicoRelacionadoId}`}
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 font-bold text-xs tracking-wider uppercase rounded transition-all"
+                                  >
+                                    {guia.servicoRelacionadoLabel || 'Agendar este cuidado'}
+                                    <ArrowRight size={13} />
+                                  </Link>
+                                )}
+                                {guia.whatsappDuvida && (
+                                  <a
+                                    href={buildWhatsAppUrl(guia.whatsappDuvida)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-500/40 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 text-xs font-medium rounded transition-colors"
+                                  >
+                                    <MessageCircle size={13} />
+                                    Conversar no Whats
+                                  </a>
+                                )}
+                              </div>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -298,6 +370,47 @@ export default function Aprenda() {
             )}
           </div>
         )}
+
+        {/* ── Papo de Café & Bar: Mitos de Salão vs. A Verdade Sincera da Drika ── */}
+        <div className="mb-20">
+          <div className="flex items-center gap-3 mb-3">
+            <Coffee size={20} className="text-[#D4AF37]" />
+            <h2 className="font-serif text-2xl md:text-3xl text-zinc-100">
+              Papo de Café: Mitos de Salão vs. A Verdade Sincera
+            </h2>
+          </div>
+          <p className="text-zinc-400 text-sm font-light mb-8 max-w-2xl">
+            Sabe aquelas histórias que todo mundo repete na roda de amigas ou no bar? Vamos separar
+            o que é lenda urbana do que a ciência capilar realmente comprova — com bom humor e
+            zero enrolação.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {mitosDeCafe.map((item) => (
+              <div
+                key={item.id}
+                className="p-6 md:p-7 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-[#D4AF37]/40 transition-all duration-300 flex flex-col justify-between gap-4"
+              >
+                <div>
+                  <span className="inline-block px-2.5 py-0.5 rounded text-[10px] uppercase tracking-wider bg-zinc-950 text-zinc-400 border border-zinc-800 font-semibold mb-3">
+                    Mito ou Verdade?
+                  </span>
+                  <h3 className="font-serif text-lg text-zinc-100 mb-3 leading-snug">
+                    {item.mito}
+                  </h3>
+                  <p className="text-zinc-300 text-xs sm:text-sm font-light leading-relaxed italic border-l-2 border-[#D4AF37] pl-3.5 mb-4">
+                    "{item.papoReto}"
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-zinc-950/90 border border-zinc-800/80 text-xs text-zinc-400 font-light leading-relaxed">
+                  <strong className="text-[#D4AF37] font-semibold">Fato científico: </strong>
+                  {item.cienciaCurta}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* ── Glossary Section ── */}
         {(selectedCategory === 'todos' || selectedCategory === 'glossario') && (
@@ -344,13 +457,26 @@ export default function Aprenda() {
               Venha tomar um café com a Drika em Itaquera. Faremos o diagnóstico visagista
               presencial e você entenderá com exatidão do que o seu fio precisa.
             </p>
-            <Link
-              to="/contato"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-[#D4AF37] text-zinc-950 font-semibold text-xs tracking-widest uppercase rounded-sm hover:bg-[#E8C95D] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
-            >
-              Agendar Diagnóstico Presencial
-              <ArrowRight size={15} />
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                to="/contato"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#D4AF37] text-zinc-950 font-semibold text-xs tracking-widest uppercase rounded-sm hover:bg-[#E8C95D] transition-all hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+              >
+                Agendar Diagnóstico Presencial
+                <ArrowRight size={15} />
+              </Link>
+              <a
+                href={buildWhatsAppUrl(
+                  'Oi Drika! ☕ Estava lendo os guias no "/aprenda" do seu site e queria tirar uma dúvida sobre o meu cabelo!'
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 border border-emerald-500/40 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 text-xs uppercase tracking-widest font-semibold rounded-sm transition-colors"
+              >
+                <MessageCircle size={15} />
+                Puxar Assunto no Whats
+              </a>
+            </div>
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Coffee } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -15,7 +15,6 @@ const staggerContainer = {
 export default function VisagismImpact() {
   return (
     <section className="relative py-24 px-6 md:px-12 bg-zinc-950 overflow-hidden border-t border-zinc-900">
-
       {/* Ambient glows */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-[#4A3B6B] opacity-[0.08] blur-[120px]" />
@@ -27,7 +26,6 @@ export default function VisagismImpact() {
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
           {/* ── Text column ── */}
           <motion.div
             initial="hidden"
@@ -37,8 +35,9 @@ export default function VisagismImpact() {
           >
             <motion.div variants={fadeUp} className="flex items-center gap-3 mb-6">
               <div className="w-8 h-px bg-[#D4AF37]/60" />
-              <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-semibold">
-                Engenharia de Imagem
+              <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-semibold inline-flex items-center gap-2">
+                <Coffee size={13} />
+                Visagismo para a Vida Real
               </span>
             </motion.div>
 
@@ -46,24 +45,34 @@ export default function VisagismImpact() {
               variants={fadeUp}
               className="font-serif text-3xl md:text-5xl text-zinc-50 leading-tight mb-6"
             >
-              Sua Imagem é Sua{' '}
-              <span className="text-[#D4AF37] italic">Estratégia de Negócios.</span>
+              Quando o espelho finalmente{' '}
+              <span className="text-[#D4AF37] italic">sorri de volta pra você.</span>
             </motion.h2>
 
             <motion.p
               variants={fadeUp}
-              className="text-zinc-400 text-base md:text-lg font-light leading-relaxed mb-10"
+              className="text-zinc-300 text-base md:text-lg font-light leading-relaxed mb-6"
             >
-              O Visagismo não é apenas sobre aparência, é sobre{' '}
-              <strong className="text-zinc-100 font-semibold">autoridade</strong>. Invista em
-              engenharia de imagem para alinhar quem você é por dentro com o que você projeta
-              por fora, blindando o seu sucesso. Não deixe o caos dominar a sua trajetória
-              profissional.
+              Visagismo não é um nome chique para te colocar numa caixinha — é justamente o
+              contrário! É sentar comigo, tomar um café e descobrir quais linhas, volumes e cores
+              conversam com o formato do seu rosto e com o{' '}
+              <strong className="text-zinc-100 font-semibold">
+                tempo real que você tem de manhã
+              </strong>
+              .
+            </motion.p>
+
+            <motion.p
+              variants={fadeUp}
+              className="text-zinc-400 text-sm md:text-base font-light leading-relaxed mb-10"
+            >
+              O resultado? Você para de brigar com o secador, ganha leveza no olhar e sente que a
+              sua imagem finalmente conta a sua própria história.
             </motion.p>
 
             <motion.div variants={fadeUp}>
               <Link
-                to="/contato"
+                to="/contato?servico=corte"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-[#D4AF37] text-zinc-950 font-semibold text-sm tracking-widest uppercase rounded-sm transition-all duration-300 hover:bg-[#E8C95D] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] active:scale-95"
               >
                 Agendar Diagnóstico de Visagismo
@@ -84,10 +93,10 @@ export default function VisagismImpact() {
             <img
               src="/images/visagismo-impact-01.jpg"
               alt="Antes e depois — transformação pelo Visagismo com Drika Santana"
+              loading="lazy"
               className="relative z-10 w-full rounded-2xl border border-zinc-800 shadow-2xl object-cover"
             />
           </motion.div>
-
         </div>
       </div>
 
