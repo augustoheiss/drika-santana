@@ -13,15 +13,22 @@ function ScrollToTop() {
 }
 
 export default function Layout() {
+  const { pathname } = useLocation()
+  const isCadWorkstation = pathname === '/servicos'
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-slate-50">
+    <div
+      className={`${
+        isCadWorkstation ? 'h-[100dvh] overflow-hidden flex flex-col' : 'min-h-screen'
+      } bg-zinc-950 text-slate-50`}
+    >
       <ScrollToTop />
       <Navbar />
-      <main>
+      <main className={isCadWorkstation ? 'flex-1 min-h-0 overflow-hidden' : ''}>
         <Outlet />
       </main>
-      <Footer />
-      <WhatsAppFloat />
+      {!isCadWorkstation && <Footer />}
+      {!isCadWorkstation && <WhatsAppFloat />}
     </div>
   )
 }

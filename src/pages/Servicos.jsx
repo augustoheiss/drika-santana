@@ -1,484 +1,1046 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useMemo, useEffect } from 'react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import {
-  Scissors,
-  Droplets,
-  Palette,
   Sparkles,
-  User,
-  Zap,
-  Star,
-  Feather,
-  ArrowRight,
-  Wand2,
+  Scissors,
   Clock,
-  Coffee,
-  ChevronDown,
+  RefreshCw,
+  ArrowRight,
   BookOpen,
+  Coffee,
+  Film,
+  Layers,
+  GraduationCap,
+  HelpCircle,
+  Pin,
+  FileText,
+  MapPin,
   MessageCircle,
-  Lightbulb,
+  Calendar,
+  PlayCircle,
+  Mic,
+  Eye,
+  CheckCircle2,
+  UserCheck,
+  Wand2,
 } from 'lucide-react'
-import Media from '../components/Media'
-import VisagismImpact from '../components/VisagismImpact'
-import FAQ from '../components/FAQ'
 import Seo from '../components/Seo'
-import CoffeeChatFinder from '../components/CoffeeChatFinder'
 import {
   SERVICE_CATEGORIES,
   SERVICES_CATALOG,
-  buildWhatsAppUrl,
+  COFFEE_CHAT_SCENARIOS,
 } from '../config/servicesCatalog'
+import {
+  DRIKA_INSTAGRAM_PROFILE,
+  DRIKA_INSTAGRAM_POSTS,
+  DRIKA_INSTAGRAM_HIGHLIGHTS,
+} from '../data/instagramDrikaArchive'
+import DrikaActionGate, {
+  useDrikaActionGate,
+  DrikaDirectModeToggle,
+  DrikaCadIconButton,
+} from '../components/ui/DrikaActionGate'
+import AcervoInstagramDrikaSection, {
+  MediaInspectorModal,
+  StoryHighlightModal,
+  ProvasReaisServico,
+} from '../components/servicos/AcervoInstagramDrikaSection'
 
-const serviceIcons = {
-  Scissors: <Scissors className="w-5 h-5 text-[#D4AF37]" />,
-  User: <User className="w-5 h-5 text-[#D4AF37]" />,
-  Wand2: <Wand2 className="w-5 h-5 text-[#D4AF37]" />,
-  Palette: <Palette className="w-5 h-5 text-[#D4AF37]" />,
-  Droplets: <Droplets className="w-5 h-5 text-[#D4AF37]" />,
-  Sparkles: <Sparkles className="w-5 h-5 text-[#D4AF37]" />,
-  Zap: <Zap className="w-5 h-5 text-[#D4AF37]" />,
-  Feather: <Feather className="w-5 h-5 text-[#D4AF37]" />,
-  Star: <Star className="w-5 h-5 text-[#D4AF37]" />,
-}
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: 'easeOut' } },
-}
-
-function ServiceCard({ service }) {
-  const [showCoffeeTalk, setShowCoffeeTalk] = useState(false)
-
-  return (
-    <motion.div
-      variants={itemVariants}
-      className="group relative p-7 border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/80 hover:border-[#D4AF37]/40 transition-all duration-300 flex flex-col justify-between rounded-sm"
-    >
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/0 to-transparent group-hover:via-[#D4AF37]/30 transition-all duration-500" />
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <div className="p-3 bg-zinc-950 inline-block border border-zinc-800 group-hover:border-[#D4AF37]/30 transition-colors">
-            {serviceIcons[service.iconName] || <Scissors className="w-5 h-5 text-[#D4AF37]" />}
-          </div>
-          {service.duration && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-400 font-light">
-              <Clock size={11} className="text-[#D4AF37]" />
-              {service.duration}
-            </span>
-          )}
-        </div>
-
-        <h4 className="font-serif text-lg text-zinc-100 mb-2 leading-snug">{service.title}</h4>
-        <p className="text-zinc-400 text-sm leading-relaxed font-light mb-5">
-          {service.description}
-        </p>
-
-        {/* Agonista de Aprendizado: Toggle "Papo Reto da Drika (Conversa de Café)" */}
-        {service.papoDeCafe && (
-          <div className="mb-6">
-            <button
-              type="button"
-              onClick={() => setShowCoffeeTalk((prev) => !prev)}
-              aria-expanded={showCoffeeTalk}
-              className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-zinc-950/90 border border-zinc-800 hover:border-[#D4AF37]/40 text-left text-xs text-zinc-300 hover:text-[#D4AF37] transition-all cursor-pointer"
-            >
-              <span className="inline-flex items-center gap-2 font-medium">
-                <Coffee size={14} className="text-[#D4AF37] shrink-0" />
-                <span>Papo reto da Drika: como funciona?</span>
-              </span>
-              <ChevronDown
-                size={15}
-                className={`text-zinc-500 transition-transform duration-300 shrink-0 ${
-                  showCoffeeTalk ? 'rotate-180 text-[#D4AF37]' : ''
-                }`}
-              />
-            </button>
-
-            <AnimatePresence initial={false}>
-              {showCoffeeTalk && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.28 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-2.5 p-4 rounded-lg bg-zinc-950 border border-[#D4AF37]/25 space-y-3">
-                    <p className="text-zinc-300 text-xs leading-relaxed font-light italic">
-                      "{service.papoDeCafe}"
-                    </p>
-
-                    {service.cienciaSemEnrolacao && (
-                      <div className="pt-2.5 border-t border-zinc-800/80 flex items-start gap-2">
-                        <Lightbulb size={13} className="text-[#D4AF37] shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-zinc-400 leading-relaxed font-light">
-                          <strong className="text-[#D4AF37] font-semibold">Na prática: </strong>
-                          {service.cienciaSemEnrolacao}
-                        </p>
-                      </div>
-                    )}
-
-                    {service.relatedGuideId && (
-                      <div className="pt-1">
-                        <Link
-                          to={`/aprenda?guia=${service.relatedGuideId}`}
-                          className="inline-flex items-center gap-1.5 text-[11px] text-[#D4AF37] hover:text-[#E8C95D] font-medium underline underline-offset-4"
-                        >
-                          <BookOpen size={12} />
-                          {service.relatedGuideLabel || 'Aprender mais no guia prático'}
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
-
-      {/* Action Footer: Pre-selected Booking + Contextual WhatsApp Question */}
-      <div className="pt-4 border-t border-zinc-800/70 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          to={`/contato?servico=${service.id}`}
-          className="inline-flex items-center gap-1.5 text-[#D4AF37] text-xs tracking-widest uppercase font-semibold hover:gap-2.5 transition-all duration-200"
-        >
-          Agendar este serviço
-          <ArrowRight size={13} />
-        </Link>
-
-        {service.whatsappQuestion && (
-          <a
-            href={buildWhatsAppUrl(service.whatsappQuestion)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-emerald-400 text-xs font-light transition-colors"
-            title="Tirar uma dúvida sincera com a Drika no WhatsApp sobre este serviço"
-          >
-            <MessageCircle size={13} />
-            <span>Tirar dúvida</span>
-          </a>
-        )}
-      </div>
-    </motion.div>
-  )
-}
-
-// ── Instagram Reels Gallery ──────────────────────────────────────────────────
-
-// Extract reel ID from a full Instagram URL and return the embed URL
-const toEmbedUrl = (url) => {
-  const match = url.match(/\/reel\/([\w-]+)/)
-  return match ? `https://www.instagram.com/p/${match[1]}/embed/` : url
-}
-
-const instagramVideos = [
-  'https://www.instagram.com/drika_hair_santana/reel/DReW3LPkaKj/',
-  'https://www.instagram.com/drika_hair_santana/reel/DUo0RWEEQ_K/',
-  'https://www.instagram.com/drika_hair_santana/reel/DRlCQVSERhk/',
-  'https://www.instagram.com/drika_hair_santana/reel/DRp5mHcER19/',
-  'https://www.instagram.com/drika_hair_santana/reel/DRvDOw_Ed9C/',
-  'https://www.instagram.com/drika_hair_santana/reel/DRxn9ktEeu4/',
-  'https://www.instagram.com/drika_hair_santana/reel/DR2xlbNkcBg/',
-  'https://www.instagram.com/drika_hair_santana/reel/DSYaOj7EVcf/',
-  'https://www.instagram.com/drika_hair_santana/reel/DS5pi9vEdJp/',
-  'https://www.instagram.com/drika_hair_santana/reel/DTRRGAxkUYf/',
-  'https://www.instagram.com/drika_hair_santana/reel/DTgkSA1iWys/',
-  'https://www.instagram.com/drika_hair_santana/reel/DTv5xwgEZon/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVPEUHHkSC7/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVRpLZqjQjy/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVUN8Y_DQfR/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVWyxeQjYhz/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVfCx3XEcY4/',
-  'https://www.instagram.com/drika_hair_santana/reel/DVhfiRLEcc6/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWFpeE8kQUT/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWKgxwFEZ9a/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWQD_1UjLcl/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWVGIM7kcYL/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWW9S_wEdg9/',
-  'https://www.instagram.com/drika_hair_santana/reel/DWuVuGKhTtt/',
-  'https://www.instagram.com/drika_hair_santana/reel/DL-6pjtMplq/',
-  'https://www.instagram.com/drika_hair_santana/reel/DMGpBEaxMqE/',
-  'https://www.instagram.com/drika_hair_santana/reel/DMJO9aNR-2I/',
-  'https://www.instagram.com/drika_hair_santana/reel/DMQ8N1nRqRa/',
-  'https://www.instagram.com/drika_hair_santana/reel/DMYwk52xB5Q/',
-  'https://www.instagram.com/drika_hair_santana/reel/DMtGj-RRZpO/',
-  'https://www.instagram.com/drika_hair_santana/reel/DNEihEuxTJ6/',
-  'https://www.instagram.com/drika_hair_santana/reel/DNhOXPyRuZW/',
-  'https://www.instagram.com/drika_hair_santana/reel/DPsRudbESNM/',
-  'https://www.instagram.com/drika_hair_santana/reel/DQCP8AejIHG/',
-  'https://www.instagram.com/drika_hair_santana/reel/DQzrrmfEQbh/',
+const MASTERCLASSES = [
+  {
+    id: 'mc-01',
+    type: 'Masterclass em Vídeo',
+    title: 'O Fim do Padrão Único: Beleza Sob Medida',
+    description:
+      'A era de tentar se encaixar num molde pronto acabou. Veja como unimos o corte a seco (Dry Cut), o respeito à curvatura natural e a coloração de baixa manutenção aqui em Itaquera.',
+    videoId: 'u30k-G-tlOI',
+  },
+  {
+    id: 'mc-02',
+    type: 'Episódio de Podcast',
+    title: 'Autoestima Real: Cuidado que Respeita o Seu Fio',
+    description:
+      'Chega de procedimentos de "linha de montagem" que deixam todo mundo igual. Um bate-papo sincero sobre como preservar a saúde da fibra capilar enquanto valorizamos sua identidade.',
+    videoId: 'kaU7PpA0M_8',
+  },
+  {
+    id: 'mc-03',
+    type: 'Masterclass em Vídeo',
+    title: 'A Vida Secreta do Fio e a Alquimia da Cor',
+    description:
+      'Entenda de um jeito simples o que é cutícula e córtex, e como a matemática das cores (colorimetria) permite iluminar ou colorir o cabelo mantendo o brilho e a maciez.',
+    videoId: '8IfKr1ZifuU',
+  },
+  {
+    id: 'mc-04',
+    type: 'Episódio de Podcast',
+    title: 'Visagismo Prático & Saúde do Couro Cabeludo',
+    description:
+      'O que o seu corte comunica antes mesmo de você dizer "bom dia"? Conversamos sobre harmonia facial, rotina prática e por que aposentamos tratamentos agressivos.',
+    videoId: 'UeJmN1C9i_c',
+  },
 ]
 
-function VideoCard({ url, index }) {
-  const embedUrl = toEmbedUrl(url)
+const FAQ_LIST = [
+  {
+    q: 'Como funciona o agendamento e o sinal de reserva?',
+    a: 'Para garantir um atendimento com tempo 100% exclusivo para você e sem filas, solicitamos um pequeno sinal no momento da reserva pelo WhatsApp. Esse valor é integralmente abatido do valor final no dia do seu procedimento.',
+  },
+  {
+    q: 'Qual é o horário e os dias de funcionamento?',
+    a: 'Nosso atendimento em São Paulo (Itaquera) é de quarta a sábado, das 9h às 18h, sempre com horário marcado. Também realizamos temporadas especiais com agenda aberta no Paraná (Itambé, Floresta e Maringá).',
+  },
+  {
+    q: 'O que é o Visagismo Prático e como ele me ajuda no dia a dia?',
+    a: 'O visagismo harmoniza o corte, o caimento e as cores com a geometria do seu rosto e o tempo real que você tem de manhã. Você sai com um cabelo que consegue arrumar em casa em poucos minutos.',
+  },
+  {
+    q: 'O Studio atende cortes masculinos, barbearia e público infantil?',
+    a: 'Sim! Além da especialização em visagismo feminino, Chanel/Pixie e cachos (Dry Cut), a Drika possui formação em Barbearia Clássica e realiza cortes masculinos e infantis com total acolhimento.',
+  },
+  {
+    q: '¿Atienden a personas que hablan español?',
+    a: '¡Sí, con mucho gusto! Drika habla español y recibe con gran cariño a la comunidad hispanohablante de São Paulo y região.',
+  },
+]
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5, delay: Math.min(index * 0.04, 0.4), ease: 'easeOut' }}
-      whileHover={{ scale: 1.02, zIndex: 10 }}
-      className="relative overflow-hidden rounded-md border border-zinc-800 bg-zinc-900
-                 shadow-md hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]
-                 hover:border-[#D4AF37]/40 transition-shadow duration-300"
-    >
-      {/* Gold top accent on hover */}
-      <div
-        className="absolute inset-x-0 top-0 h-[2px] z-10
-                      bg-gradient-to-r from-transparent via-[#D4AF37]/0 to-transparent
-                      hover:via-[#D4AF37] transition-all duration-500"
-      />
-
-      {/* Instagram embed iframe — aspect ratio 9:16 (Reels) */}
-      <div className="relative w-full" style={{ paddingBottom: '177.78%' }}>
-        <iframe
-          src={embedUrl}
-          title={`Reel Drika Santana ${index + 1}`}
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-          className="absolute inset-0 w-full h-full border-0 rounded-md"
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-function VideoGallery() {
-  const [visibleCount, setVisibleCount] = useState(9)
-
-  return (
-    <section className="py-24 px-6 md:px-12 border-t border-zinc-900">
-      <div className="max-w-7xl mx-auto">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="mb-16 max-w-3xl"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-px bg-[#D4AF37]/60" />
-            <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-semibold">
-              Galeria em Movimento
-            </span>
-          </div>
-
-          <h2 className="font-serif text-3xl md:text-5xl text-zinc-50 leading-tight mb-6">
-            A Técnica em Movimento:{' '}
-            <span className="text-[#D4AF37] italic">
-              Resultados Reais na Cadeira da Drika.
-            </span>
-          </h2>
-
-          <p className="text-zinc-400 text-base md:text-lg font-light leading-relaxed max-w-2xl">
-            Cabelo bonito de verdade tem balanço, brilho e leveza quando você mexe a cabeça. O que
-            você vê abaixo são clientes reais saindo do Studio com a autoestima lá em cima.{' '}
-            <span className="text-[#D4AF37]/90">
-              Dê o play nos vídeos abaixo e veja o caimento em tempo real.
-            </span>
-          </p>
-        </motion.div>
-
-        {/* Video grid — responsive: 2 cols mobile → 3 → 4 → 5 desktop */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
-          {instagramVideos.slice(0, visibleCount).map((url, i) => (
-            <VideoCard key={url + i} url={url} index={i} />
-          ))}
-        </div>
-
-        {/* Load More button — only rendered if more videos exist */}
-        {visibleCount < instagramVideos.length && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex justify-center mt-12"
-          >
-            <button
-              onClick={() => setVisibleCount((prev) => prev + 9)}
-              className="
-                inline-flex items-center gap-3
-                px-8 py-4
-                border border-[#D4AF37] text-[#D4AF37]
-                text-sm font-semibold tracking-widest uppercase
-                rounded-sm
-                transition-all duration-300
-                hover:bg-[#D4AF37] hover:text-zinc-950
-                hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]
-                active:scale-95
-              "
-            >
-              Carregar Mais Transformações
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </motion.div>
-        )}
-      </div>
-    </section>
-  )
-}
+const STATIONS = [
+  {
+    id: 'servicos',
+    code: 'EST-01',
+    shortTitle: 'Bancada de Serviços',
+    fullTitle: 'Bancada de Serviços & Visagismo (9 Procedimentos)',
+    description:
+      'Explore as 4 categorias do Studio (Cabelo, Barba, Rosto e Unhas), inspecione a ficha técnica de cada procedimento e veja as provas reais extraídas do Instagram da Drika.',
+    drikaTip: 'Cada serviço exibe fotos e Reels reais de clientes atendidas pela Drika.',
+    icon: Scissors,
+    badge: '9',
+  },
+  {
+    id: 'acervo',
+    code: 'EST-02',
+    shortTitle: 'Transformações Instagram',
+    fullTitle: 'Acervo Nativo @drika_hair_santana (63 Posts & 36 Reels MP4)',
+    description:
+      'Galeria 100% nativa (zero iframes lentos) com os Reels em vídeo MP4, antes e depois, Butterfly Cut, Pixie, Chanel de Bico, Cachos e Grisalhos.',
+    drikaTip: 'Use os filtros rápidos por técnica capilar ou ative o filtro exclusivo de vídeos MP4.',
+    icon: Film,
+    badge: '63',
+  },
+  {
+    id: 'stories',
+    code: 'EST-03',
+    shortTitle: 'Stories & Destaques',
+    fullTitle: 'Stories, Destaques & Bastidores (@drika_hair_santana)',
+    description:
+      'Assista aos 17 Destaques de Stories oficiais da Drika (Feedback, Cabelo Feminino, Mechas, Cursos, Paraná PR, Unhas, Sobrancelha e mais) em player nativo.',
+    drikaTip: 'Clique nos anéis de ícone para inspecionar o tema do destaque ou nos cartões com título para abrir direto.',
+    icon: Sparkles,
+    badge: '17',
+  },
+  {
+    id: 'bussola',
+    code: 'EST-04',
+    shortTitle: 'Bússola Papo de Café',
+    fullTitle: 'Bússola "Papo de Café" — Diagnóstico de Visagismo em 4 Cenários',
+    description:
+      'Ainda não sabe o nome técnico do que procura? Escolha como você quer se sentir ao olhar no espelho e descubra a recomendação da Drika.',
+    drikaTip: 'Ideal para quem quer mudar o visual com segurança e praticidade na rotina.',
+    icon: Coffee,
+    badge: '4',
+  },
+  {
+    id: 'ciencia',
+    code: 'EST-05',
+    shortTitle: 'Ciência, Aulas & FAQ',
+    fullTitle: 'Masterclasses, Podcasts & Dúvidas Frequentes',
+    description:
+      'Assista às videoaulas e podcasts da Drika sobre Ciência do Fio e tire todas as suas dúvidas sobre agendamento, sinal de reserva e horários.',
+    drikaTip: 'Conhecimento técnico compartilhado de forma leve, como uma conversa tomando café.',
+    icon: GraduationCap,
+    badge: '9',
+  },
+]
 
 export default function Servicos() {
-  const categoriesWithServices = SERVICE_CATEGORIES.map((cat) => ({
-    ...cat,
-    services: SERVICES_CATALOG.filter((s) => s.categoryId === cat.id),
-  }))
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  const {
+    pendingAction,
+    directMode,
+    toggleDirectMode,
+    requestIconAction,
+    confirmAction,
+    cancelAction,
+  } = useDrikaActionGate()
+
+  // Estado da Estação Ativa (Default: 'servicos' ou via query ?estacao=...)
+  const [activeStation, setActiveStation] = useState(() => {
+    const param = searchParams.get('estacao')
+    return STATIONS.some((s) => s.id === param) ? param : 'servicos'
+  })
+
+  // Estado da Estação 01 (Bancada de Serviços)
+  const [activeCategoryId, setActiveCategoryId] = useState('cabelo')
+  const [activeServiceId, setActiveServiceId] = useState(() => {
+    const srvParam = searchParams.get('servico')
+    return SERVICES_CATALOG.some((s) => s.id === srvParam) ? srvParam : 'corte'
+  })
+
+  // Estado da Estação 04 (Bússola Papo de Café)
+  const [activeScenarioId, setActiveScenarioId] = useState(COFFEE_CHAT_SCENARIOS[0].id)
+
+  // Estado da Estação 05 (Masterclasses & FAQ)
+  const [activeMasterclassId, setActiveMasterclassId] = useState(MASTERCLASSES[0].id)
+  const [activeFaqIndex, setActiveFaqIndex] = useState(0)
+
+  // Modais Nativos do Instagram
+  const [inspectedPost, setInspectedPost] = useState(null)
+  const [inspectedHighlight, setInspectedHighlight] = useState(null)
+
+  // Sincroniza query params se mudarem
+  useEffect(() => {
+    const srv = searchParams.get('servico')
+    if (srv && SERVICES_CATALOG.some((s) => s.id === srv)) {
+      const found = SERVICES_CATALOG.find((s) => s.id === srv)
+      setActiveCategoryId(found.categoryId)
+      setActiveServiceId(found.id)
+      setActiveStation('servicos')
+    }
+    const est = searchParams.get('estacao')
+    if (est && STATIONS.some((s) => s.id === est)) {
+      setActiveStation(est)
+    }
+  }, [searchParams])
+
+  const servicesInActiveCategory = useMemo(
+    () => SERVICES_CATALOG.filter((s) => s.categoryId === activeCategoryId),
+    [activeCategoryId]
+  )
+
+  const selectedService = useMemo(
+    () =>
+      SERVICES_CATALOG.find((s) => s.id === activeServiceId) ||
+      servicesInActiveCategory[0] ||
+      SERVICES_CATALOG[0],
+    [activeServiceId, servicesInActiveCategory]
+  )
+
+  const selectedScenario = useMemo(
+    () =>
+      COFFEE_CHAT_SCENARIOS.find((c) => c.id === activeScenarioId) || COFFEE_CHAT_SCENARIOS[0],
+    [activeScenarioId]
+  )
+
+  const scenarioRecommendedService = useMemo(
+    () =>
+      SERVICES_CATALOG.find((s) => s.id === selectedScenario.recommendedServiceId) ||
+      SERVICES_CATALOG[0],
+    [selectedScenario]
+  )
+
+  const selectedMasterclass = useMemo(
+    () => MASTERCLASSES.find((m) => m.id === activeMasterclassId) || MASTERCLASSES[0],
+    [activeMasterclassId]
+  )
+
+  const handleCategorySelect = (catId) => {
+    setActiveCategoryId(catId)
+    const firstSrv = SERVICES_CATALOG.find((s) => s.categoryId === catId)
+    if (firstSrv) setActiveServiceId(firstSrv.id)
+  }
 
   return (
-    <div className="bg-zinc-950 min-h-screen pt-16">
+    <div className="h-full w-full pt-16 bg-zinc-950 text-zinc-100 flex flex-col overflow-hidden select-none">
       <Seo
-        title="Menu de Serviços & Visagismo — Drika Santana Studio"
-        description="Conheça nossos serviços em Itaquera num papo sincero: Visagismo prático, cortes geométricos (Chanel e Long Bob), Dry Cut para crespos e cacheados, barbearia e colorimetria."
+        title="Bancada Interativa de Serviços & Instagram Nativo — Drika Santana"
+        description="Explore os serviços de visagismo, cortes, cachos (Dry Cut), colorimetria e o acervo nativo de Reels e Stories de @drika_hair_santana em uma bancada interativa sem rolagem."
         canonicalUrl="https://drikasantana.vercel.app/servicos"
       />
 
-      {/* ── Page header ── */}
-      <section className="relative py-20 px-6 border-b border-zinc-900 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#4A3B6B] opacity-[0.08] blur-[100px]" />
+      {/* ── BARRA DE COMANDO SUPERIOR CAD (Botões COM Título = 1 Clique Direto) ── */}
+      <header className="shrink-0 bg-zinc-900/90 border-b border-zinc-800 px-3 md:px-5 py-2 flex flex-wrap items-center justify-between gap-2 z-20">
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] shadow-[0_0_10px_#D4AF37]" />
+          <div>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] font-bold block">
+              DRK-CAD · STUDIO WORKSTATION
+            </span>
+            <h1 className="font-serif text-sm md:text-base text-zinc-50 leading-none">
+              Menu Interativo & Acervo <span className="text-[#D4AF37] italic">@drika_hair_santana</span>
+            </h1>
+          </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 max-w-3xl mx-auto text-center"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 text-xs tracking-[0.25em] uppercase text-[#D4AF37] font-medium mb-6">
-            Menu de Serviços & Aprendizado
-          </span>
-          <h1 className="font-serif text-4xl md:text-6xl text-zinc-50 leading-tight">
-            Nosso <span className="text-[#D4AF37] italic">Menu de Serviços</span>
-          </h1>
-          <p className="text-zinc-400 text-lg font-light mt-5 leading-relaxed max-w-2xl mx-auto">
-            Conheça cada procedimento como se estivéssemos conversando na mesa de um café: com
-            sinceridade, ciência descomplicada e foco no que funciona na sua vida real.
-          </p>
-        </motion.div>
-      </section>
 
-      {/* ── Interactive Coffee Chat Finder (Agonista de Aprendizado) ── */}
-      <CoffeeChatFinder />
-
-      {/* ── Categories ── */}
-      {categoriesWithServices.map((cat, catIndex) => (
-        <section
-          key={cat.id}
-          className={`py-20 px-6 md:px-12 ${catIndex > 0 ? 'border-t border-zinc-900' : ''}`}
+        {/* Abas das 5 Estações COM Título Visível -> Mudam em 1 Clique Direto! */}
+        <nav
+          aria-label="Estações da Bancada"
+          className="flex items-center gap-1.5 overflow-x-auto max-w-full py-0.5"
         >
-          <div className="max-w-7xl mx-auto">
-            {/* Category header */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-              className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12"
-            >
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-px bg-[#D4AF37]/60" />
-                  <span className="text-[#D4AF37] text-xs tracking-[0.3em] uppercase font-semibold">
-                    {cat.label}
-                  </span>
+          {STATIONS.map((st) => {
+            const Icon = st.icon
+            const isActive = activeStation === st.id
+            return (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setActiveStation(st.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 shrink-0 cursor-pointer border ${
+                  isActive
+                    ? 'bg-[#D4AF37] text-zinc-950 border-[#D4AF37] font-semibold shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                    : 'bg-zinc-950/90 text-zinc-300 border-zinc-800 hover:border-[#D4AF37]/50 hover:text-zinc-100'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{st.shortTitle}</span>
+                <span
+                  className={`text-[10px] font-mono px-1.5 rounded-full ${
+                    isActive ? 'bg-zinc-950/20 text-zinc-950' : 'bg-zinc-900 text-[#D4AF37]'
+                  }`}
+                >
+                  {st.badge}
+                </span>
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Controles de Governança à Direita */}
+        <div className="hidden xl:flex items-center gap-2">
+          <DrikaDirectModeToggle directMode={directMode} onToggle={toggleDirectMode} />
+          <Link
+            to={`/contato?servico=${selectedService.id}`}
+            className="px-3.5 py-1.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Agendar</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* ── CORPO CENTRAL DA WORKSTATION (DOCK DE ÍCONES CAD + PALCO CENTRAL) ── */}
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        {/* DOCK LATERAL ESQUERDO DE ÍCONES CAD (Botões SÓ DE ÍCONE -> Acionam <DrikaActionGate />!) */}
+        <aside
+          aria-label="Paleta de Ferramentas de Ícone CAD"
+          className="w-14 md:w-16 shrink-0 bg-zinc-900/70 border-r border-zinc-800 flex flex-col items-center justify-between py-3 px-1.5 z-10 overflow-y-auto"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-500 text-center">
+              CAD
+              <br />
+              Ícones
+            </span>
+
+            {STATIONS.map((st) => {
+              const Icon = st.icon
+              const isActive = activeStation === st.id
+              return (
+                <DrikaCadIconButton
+                  key={`dock-${st.id}`}
+                  active={isActive}
+                  badge={st.badge}
+                  ariaLabel={`Inspecionar ferramenta: ${st.fullTitle}`}
+                  icon={<Icon className="w-4 h-4" />}
+                  onClick={() =>
+                    requestIconAction({
+                      code: st.code,
+                      category: 'Estação da Bancada CAD',
+                      title: st.fullTitle,
+                      description: st.description,
+                      drikaTip: st.drikaTip,
+                      destination: `Palco Central → ${st.shortTitle}`,
+                      confirmLabel: `Abrir ${st.shortTitle}`,
+                      onConfirm: () => setActiveStation(st.id),
+                    })
+                  }
+                />
+              )
+            })}
+          </div>
+
+          <div className="w-8 h-px bg-zinc-800 my-1" />
+
+          {/* Atalhos Especiais de Ícone do Instagram & Atendimento */}
+          <div className="flex flex-col items-center gap-2">
+            {/* Ícone 1: Vídeo Manifesto Fixado */}
+            <DrikaCadIconButton
+              variant="gold-outline"
+              ariaLabel="Inspecionar Vídeo Manifesto Fixado da Drika"
+              icon={<Pin className="w-4 h-4" />}
+              onClick={() => {
+                const pinned =
+                  DRIKA_INSTAGRAM_POSTS.find((p) => p.isPinned) || DRIKA_INSTAGRAM_POSTS[0]
+                requestIconAction({
+                  code: 'DRK-IG-PINNED',
+                  category: 'Destaque Oficial @drika_hair_santana',
+                  title: pinned.title,
+                  description: pinned.technicalSummary,
+                  drikaTip:
+                    'Assista em MP4 nativo à apresentação oficial da Drika sobre visagismo e transformação capilar.',
+                  previewImage: pinned.image,
+                  badge: 'REEL MP4 FIXADO',
+                  destination: 'Player Nativo de Vídeo',
+                  confirmLabel: 'Reproduzir Vídeo Manifesto',
+                  onConfirm: () => setInspectedPost(pinned),
+                })
+              }}
+            />
+
+            {/* Ícone 2: Regras de Agendamento e Sinal */}
+            <DrikaCadIconButton
+              ariaLabel="Inspecionar Regras de Agendamento e Sinal de Reserva"
+              icon={<FileText className="w-4 h-4" />}
+              onClick={() => {
+                const rulesPost =
+                  DRIKA_INSTAGRAM_POSTS.find((p) => p.code === 'DcpcsKkRlvM') ||
+                  DRIKA_INSTAGRAM_POSTS[0]
+                requestIconAction({
+                  code: 'DRK-IG-RULES',
+                  category: 'Política de Atendimento Exclusivo',
+                  title: 'Regras de Agendamento & Sinal de Reserva',
+                  description:
+                    'Comunicado oficial publicado no Instagram da Drika explicando como funciona a reserva de horário exclusivo e o abatimento integral do sinal.',
+                  previewImage: rulesPost.image,
+                  badge: 'COMUNICADO OFICIAL',
+                  destination: 'Visor de Comunicado',
+                  confirmLabel: 'Ler Regras de Agendamento',
+                  onConfirm: () => setInspectedPost(rulesPost),
+                })
+              }}
+            />
+
+            {/* Ícone 3: Unidades SP & Paraná */}
+            <DrikaCadIconButton
+              ariaLabel="Inspecionar Unidades de Atendimento SP e Paraná"
+              icon={<MapPin className="w-4 h-4" />}
+              onClick={() => {
+                const prPost =
+                  DRIKA_INSTAGRAM_POSTS.find((p) => p.code === 'Dez6RcFBI6M') ||
+                  DRIKA_INSTAGRAM_POSTS[0]
+                requestIconAction({
+                  code: 'DRK-LOC-SP-PR',
+                  category: 'Atendimento Presencial',
+                  title: 'São Paulo (Itaquera) & Temporadas Paraná (Itambé, Floresta, Maringá)',
+                  description:
+                    'Veja os bastidores da bancada da Drika em ação tanto no Studio em Itaquera (SP) quanto nas temporadas especiais no Paraná.',
+                  previewImage: prPost.image,
+                  badge: 'SP & PARANÁ',
+                  destination: 'Reel de Bastidores PR/SP',
+                  confirmLabel: 'Assistir Bastidores SP/PR',
+                  onConfirm: () => setInspectedPost(prPost),
+                })
+              }}
+            />
+
+            {/* Ícone 4: WhatsApp Direto */}
+            <DrikaCadIconButton
+              variant="gold-outline"
+              ariaLabel="Inspecionar canal direto do WhatsApp da Drika"
+              icon={<MessageCircle className="w-4 h-4" />}
+              onClick={() =>
+                requestIconAction({
+                  code: 'DRK-WA-BIO',
+                  category: 'Contato Direto',
+                  title: 'Conversar com a Drika pelo WhatsApp Oficial',
+                  description:
+                    'Abre o canal direto de agendamento e consultoria (+55 11 97846-6027) vinculado à biografia do Instagram @drika_hair_santana.',
+                  drikaTip: 'Envie uma foto do seu cabelo atual se quiser agilizar a avaliação!',
+                  destination: 'WhatsApp Web / App',
+                  confirmLabel: 'Abrir WhatsApp da Drika',
+                  onConfirm: () =>
+                    window.open(
+                      DRIKA_INSTAGRAM_PROFILE.whatsappUrl,
+                      '_blank',
+                      'noopener,noreferrer'
+                    ),
+                })
+              }
+            />
+          </div>
+        </aside>
+
+        {/* ── PALCO CENTRAL MODULADO (ZERO SCROLL DE PÁGINA) ── */}
+        <section className="flex-1 min-w-0 min-h-0 p-3 md:p-4 overflow-hidden flex flex-col">
+          {/* ===================================================================
+              ESTAÇÃO 01: BANCADA DE SERVIÇOS & VISAGISMO (9 PROCEDIMENTOS)
+             =================================================================== */}
+          {activeStation === 'servicos' && (
+            <div className="h-full flex flex-col gap-3 overflow-hidden">
+              {/* Seletor das 4 Categorias (Botões COM Título = 1 Clique Direto) */}
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-zinc-900/60 border border-zinc-800/90 p-2.5 rounded-2xl shrink-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {SERVICE_CATEGORIES.map((cat) => {
+                    const isCatActive = activeCategoryId === cat.id
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleCategorySelect(cat.id)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                          isCatActive
+                            ? 'bg-[#D4AF37] text-zinc-950 font-bold shadow-[0_0_20px_rgba(212,175,55,0.25)]'
+                            : 'bg-zinc-950 text-zinc-300 border border-zinc-800 hover:border-[#D4AF37]/40'
+                        }`}
+                      >
+                        <span>{cat.label}</span>
+                      </button>
+                    )
+                  })}
                 </div>
-                <h2 className="font-serif text-2xl md:text-4xl text-zinc-50 leading-tight">
-                  {cat.headline}
-                </h2>
-                <p className="text-zinc-400 text-sm font-light mt-2 max-w-lg">
-                  {cat.description}
-                </p>
+
+                <span className="hidden md:inline-block font-mono text-[11px] text-zinc-400">
+                  Selecione um procedimento à esquerda para inspecionar sua ciência e provas reais
+                </span>
               </div>
-            </motion.div>
 
-            {/* Service cards */}
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className={`grid gap-5 ${
-                cat.services.length === 1
-                  ? 'grid-cols-1 md:grid-cols-2 lg:w-2/3'
-                  : cat.services.length === 2
-                    ? 'grid-cols-1 md:grid-cols-2'
-                    : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-              }`}
-            >
-              {cat.services.map((service) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-            </motion.div>
-          </div>
+              {/* Grid Principal de 12 Colunas da Bancada de Serviços */}
+              <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 overflow-hidden">
+                {/* Coluna Esquerda (4 cols): Lista de Procedimentos da Categoria */}
+                <div className="lg:col-span-4 flex flex-col gap-2 overflow-y-auto pr-1">
+                  {servicesInActiveCategory.map((srv) => {
+                    const isSelected = selectedService.id === srv.id
+                    return (
+                      <div
+                        key={srv.id}
+                        className={`p-3 rounded-2xl border transition-all flex items-start justify-between gap-2 ${
+                          isSelected
+                            ? 'bg-zinc-900 border-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.12)]'
+                            : 'bg-zinc-900/40 border-zinc-800/90 hover:border-zinc-700'
+                        }`}
+                      >
+                        {/* Área clicável COM Título -> Seleciona o serviço em 1 clique! */}
+                        <button
+                          type="button"
+                          onClick={() => setActiveServiceId(srv.id)}
+                          className="flex-1 text-left cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2 py-0.5 rounded bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] font-mono text-[9px] uppercase tracking-wider">
+                              {srv.badge}
+                            </span>
+                            <span className="font-mono text-[10px] text-zinc-400 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-[#D4AF37]" />
+                              {srv.duracao}
+                            </span>
+                          </div>
+                          <h3 className="font-serif text-base text-zinc-50 leading-snug">
+                            {srv.title}
+                          </h3>
+                          <p className="text-xs text-zinc-400 font-light mt-0.5 line-clamp-2">
+                            {srv.subtitle}
+                          </p>
+                        </button>
+
+                        {/* Botão SÓ DE ÍCONE ao lado -> Aciona <DrikaActionGate /> */}
+                        <DrikaCadIconButton
+                          size="sm"
+                          active={isSelected}
+                          ariaLabel={`Inspecionar resumo rápido de ${srv.title}`}
+                          icon={<Eye className="w-3.5 h-3.5" />}
+                          onClick={() =>
+                            requestIconAction({
+                              code: `SRV-${srv.id.toUpperCase()}`,
+                              category: srv.badge,
+                              title: `${srv.title} — ${srv.subtitle}`,
+                              description: srv.oQueFaz,
+                              drikaTip: `Tempo médio na cadeira: ${srv.duracao} | Manutenção recomendada: ${srv.manutencao}.`,
+                              destination: 'Ficha Técnica & Provas Reais na Bancada',
+                              confirmLabel: 'Abrir Procedimento na Bancada',
+                              onConfirm: () => setActiveServiceId(srv.id),
+                            })
+                          }
+                        />
+                      </div>
+                    )
+                  })}
+
+                  {/* Atalho Rápido para Todos os 9 Procedimentos */}
+                  <div className="p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800/70 space-y-2 mt-auto">
+                    <span className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+                      Acesso Direto aos 9 Procedimentos:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SERVICES_CATALOG.map((srv) => (
+                        <button
+                          key={`chip-${srv.id}`}
+                          type="button"
+                          onClick={() => {
+                            setActiveCategoryId(srv.categoryId)
+                            setActiveServiceId(srv.id)
+                          }}
+                          className={`px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer border ${
+                            selectedService.id === srv.id
+                              ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37] font-semibold'
+                              : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                          }`}
+                        >
+                          {srv.shortTitle}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coluna Direita (8 cols): Visor Técnico do Procedimento + Provas Reais do Instagram */}
+                <div className="lg:col-span-8 rounded-2xl bg-zinc-900/50 border border-zinc-800/90 p-4 md:p-5 overflow-y-auto flex flex-col justify-between gap-4">
+                  <div className="space-y-4">
+                    {/* Cabeçalho da Ficha Técnica */}
+                    <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-zinc-800">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] font-mono text-[10px] uppercase tracking-widest font-semibold">
+                            {selectedService.badge}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[10px] flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#D4AF37]" />
+                            Duração: {selectedService.duracao}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[10px] flex items-center gap-1">
+                            <RefreshCw className="w-3 h-3 text-[#D4AF37]" />
+                            Manutenção: {selectedService.manutencao}
+                          </span>
+                        </div>
+                        <h2 className="font-serif text-2xl md:text-3xl text-zinc-50">
+                          {selectedService.title}{' '}
+                          <span className="text-[#D4AF37] italic text-xl">
+                            · {selectedService.subtitle}
+                          </span>
+                        </h2>
+                      </div>
+
+                      {/* Botões SÓ DE ÍCONE de Ação Rápida do Serviço */}
+                      <div className="flex items-center gap-2">
+                        {selectedService.guiaSlug && (
+                          <DrikaCadIconButton
+                            variant="gold-outline"
+                            ariaLabel={`Inspecionar guia educativo sobre ${selectedService.title}`}
+                            icon={<BookOpen className="w-4 h-4" />}
+                            onClick={() =>
+                              requestIconAction({
+                                code: `GUIA-${selectedService.id.toUpperCase()}`,
+                                category: 'Educação & Ciência Capilar',
+                                title: `Abrir Guia Educativo: ${selectedService.title}`,
+                                description:
+                                  'Acessa a biblioteca "Aprenda com a Drika" com a explicação passo a passo sobre como cuidar do seu fio antes e depois deste procedimento.',
+                                destination: `/aprenda?guia=${selectedService.guiaSlug}`,
+                                confirmLabel: 'Ir para o Guia Completo',
+                                onConfirm: () =>
+                                  navigate(`/aprenda?guia=${selectedService.guiaSlug}`),
+                              })
+                            }
+                          />
+                        )}
+                        <DrikaCadIconButton
+                          variant="gold-outline"
+                          ariaLabel={`Inspecionar agendamento de ${selectedService.title}`}
+                          icon={<Calendar className="w-4 h-4" />}
+                          onClick={() =>
+                            requestIconAction({
+                              code: `BOOK-${selectedService.id.toUpperCase()}`,
+                              category: 'Reserva de Horário Exclusivo',
+                              title: `Agendar ${selectedService.title}`,
+                              description: `Abre a agenda inteligente da Drika com o procedimento "${selectedService.title}" (${selectedService.duracao}) já pré-selecionado para você.`,
+                              destination: `/contato?servico=${selectedService.id}`,
+                              confirmLabel: 'Ir para Agendamento',
+                              onConfirm: () => navigate(`/contato?servico=${selectedService.id}`),
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Duas Caixas Explicativas: O Que Faz & Para Quem É */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold flex items-center gap-1.5">
+                          <Wand2 className="w-3.5 h-3.5" /> O Que Este Procedimento Faz
+                        </span>
+                        <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
+                          {selectedService.oQueFaz}
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold flex items-center gap-1.5">
+                          <UserCheck className="w-3.5 h-3.5" /> Para Quem É Indicado
+                        </span>
+                        <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
+                          {selectedService.paraQuem}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Tira de Provas Reais Extraídas do Instagram @drika_hair_santana */}
+                    <ProvasReaisServico
+                      serviceId={selectedService.id}
+                      serviceTitle={selectedService.title}
+                      onSelectPost={(post) => setInspectedPost(post)}
+                      onSelectHighlight={(hl) => setInspectedHighlight(hl)}
+                      onRequestIconAction={requestIconAction}
+                    />
+                  </div>
+
+                  {/* Barra de Ação Inferior do Serviço (Botões COM Título = 1 Clique Direto) */}
+                  <div className="pt-3 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <Link
+                        to={`/contato?servico=${selectedService.id}`}
+                        className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 shadow-[0_0_25px_rgba(212,175,55,0.25)] transition-all"
+                      >
+                        <span>Agendar {selectedService.shortTitle}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+
+                      {selectedService.guiaSlug && (
+                        <Link
+                          to={`/aprenda?guia=${selectedService.guiaSlug}`}
+                          className="px-4 py-2.5 rounded-xl border border-zinc-700 hover:border-[#D4AF37]/50 text-zinc-300 hover:text-[#D4AF37] text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-colors"
+                        >
+                          <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>Ler Guia Completo</span>
+                        </Link>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveStation('acervo')}
+                      className="text-xs font-mono text-[#D4AF37] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Film className="w-3.5 h-3.5" />
+                      <span>Ver todos os 63 posts & Reels do Instagram →</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===================================================================
+              ESTAÇÃO 02: ACERVO NATIVO & REELS @drika_hair_santana (63 POSTS)
+             =================================================================== */}
+          {activeStation === 'acervo' && (
+            <AcervoInstagramDrikaSection
+              mode="gallery"
+              onRequestIconAction={requestIconAction}
+              onSelectPost={(post) => setInspectedPost(post)}
+              onSelectHighlight={(hl) => setInspectedHighlight(hl)}
+            />
+          )}
+
+          {/* ===================================================================
+              ESTAÇÃO 03: STORIES, DESTAQUES & BASTIDORES (17 HIGHLIGHTS)
+             =================================================================== */}
+          {activeStation === 'stories' && (
+            <AcervoInstagramDrikaSection
+              mode="stories"
+              onRequestIconAction={requestIconAction}
+              onSelectPost={(post) => setInspectedPost(post)}
+              onSelectHighlight={(hl) => setInspectedHighlight(hl)}
+            />
+          )}
+
+          {/* ===================================================================
+              ESTAÇÃO 04: BÚSSOLA "PAPO DE CAFÉ" (4 CENÁRIOS CONVERSACIONAIS)
+             =================================================================== */}
+          {activeStation === 'bussola' && (
+            <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+              {/* Coluna Esquerda: Os 4 Cenários Conversacionais */}
+              <div className="lg:col-span-5 flex flex-col gap-2.5 overflow-y-auto pr-1">
+                <div className="p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
+                    <Coffee className="w-3.5 h-3.5" /> Diagnóstico Interativo
+                  </span>
+                  <h2 className="font-serif text-xl text-zinc-50 mt-1">
+                    Me conta: como você quer se sentir ao olhar no espelho?
+                  </h2>
+                </div>
+
+                {COFFEE_CHAT_SCENARIOS.map((sc, idx) => {
+                  const isSelected = selectedScenario.id === sc.id
+                  return (
+                    <div
+                      key={sc.id}
+                      className={`p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-2.5 ${
+                        isSelected
+                          ? 'bg-zinc-900 border-[#D4AF37] shadow-[0_0_25px_rgba(212,175,55,0.14)]'
+                          : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                      }`}
+                    >
+                      {/* Botão COM Título -> Seleciona cenário em 1 clique! */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveScenarioId(sc.id)}
+                        className="flex-1 text-left cursor-pointer"
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37]">
+                          Cenário 0{idx + 1} · {sc.tag}
+                        </span>
+                        <h3 className="font-serif text-base text-zinc-100 mt-1 leading-snug">
+                          {sc.question}
+                        </h3>
+                      </button>
+
+                      {/* Botão SÓ DE ÍCONE -> Aciona <DrikaActionGate /> */}
+                      <DrikaCadIconButton
+                        size="sm"
+                        active={isSelected}
+                        ariaLabel={`Inspecionar recomendação do cenário ${sc.tag}`}
+                        icon={<Sparkles className="w-3.5 h-3.5" />}
+                        onClick={() =>
+                          requestIconAction({
+                            code: `CAFE-0${idx + 1}`,
+                            category: `Cenário · ${sc.tag}`,
+                            title: sc.question,
+                            description: sc.empathyText,
+                            drikaTip: `Procedimento principal recomendado: ${scenarioRecommendedService.title}.`,
+                            destination: 'Diagnóstico da Bússola Papo de Café',
+                            confirmLabel: 'Ver Recomendação da Drika',
+                            onConfirm: () => setActiveScenarioId(sc.id),
+                          })
+                        }
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Coluna Direita: Resposta da Drika + Serviço Recomendado + Provas Reais */}
+              <div className="lg:col-span-7 rounded-2xl bg-zinc-900/50 border border-zinc-800 p-4 md:p-5 overflow-y-auto flex flex-col justify-between gap-4">
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 space-y-2">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">
+                      Resposta da Drika para Você:
+                    </span>
+                    <p className="font-serif text-base md:text-lg text-zinc-100 italic leading-relaxed">
+                      "{selectedScenario.empathyText}"
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-zinc-950/90 border border-zinc-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37]">
+                        Caminho Recomendado:
+                      </span>
+                      <span className="font-mono text-xs text-zinc-400">
+                        {scenarioRecommendedService.duracao}
+                      </span>
+                    </div>
+                    <h3 className="font-serif text-2xl text-zinc-50">
+                      {scenarioRecommendedService.title}{' '}
+                      <span className="text-[#D4AF37] italic text-lg">
+                        ({scenarioRecommendedService.subtitle})
+                      </span>
+                    </h3>
+                    <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
+                      {scenarioRecommendedService.oQueFaz}
+                    </p>
+                  </div>
+
+                  <ProvasReaisServico
+                    serviceId={scenarioRecommendedService.id}
+                    serviceTitle={scenarioRecommendedService.title}
+                    onSelectPost={(post) => setInspectedPost(post)}
+                    onSelectHighlight={(hl) => setInspectedHighlight(hl)}
+                    onRequestIconAction={requestIconAction}
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-zinc-800 flex flex-wrap items-center gap-2.5">
+                  <Link
+                    to={`/contato?servico=${scenarioRecommendedService.id}`}
+                    className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2"
+                  >
+                    <span>Agendar {scenarioRecommendedService.shortTitle}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryId(scenarioRecommendedService.categoryId)
+                      setActiveServiceId(scenarioRecommendedService.id)
+                      setActiveStation('servicos')
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-zinc-700 hover:border-[#D4AF37]/50 text-zinc-200 text-xs font-semibold uppercase tracking-wider cursor-pointer"
+                  >
+                    Abrir na Bancada de Serviços
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===================================================================
+              ESTAÇÃO 05: CIÊNCIA DO FIO, MASTERCLASSES & FAQ
+             =================================================================== */}
+          {activeStation === 'ciencia' && (
+            <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+              {/* Coluna Esquerda (6 cols): Masterclasses & Podcasts */}
+              <div className="lg:col-span-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 p-4 flex flex-col gap-3 overflow-y-auto">
+                <div>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37]">
+                    Para Ouvir Tomando um Café
+                  </span>
+                  <h2 className="font-serif text-xl text-zinc-50">
+                    Masterclasses & Podcasts da Drika
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {MASTERCLASSES.map((mc) => {
+                    const isSelected = selectedMasterclass.id === mc.id
+                    return (
+                      <button
+                        key={mc.id}
+                        type="button"
+                        onClick={() => setActiveMasterclassId(mc.id)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-zinc-900 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.12)]'
+                            : 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-[#D4AF37] mb-1">
+                          {mc.type.includes('Vídeo') ? (
+                            <PlayCircle className="w-3.5 h-3.5" />
+                          ) : (
+                            <Mic className="w-3.5 h-3.5" />
+                          )}
+                          <span>{mc.type}</span>
+                        </div>
+                        <h3 className="font-serif text-sm text-zinc-100 line-clamp-2">
+                          {mc.title}
+                        </h3>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Player Embutido da Aula Selecionada */}
+                <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-serif text-base text-zinc-100">
+                      {selectedMasterclass.title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-light mt-1">
+                      {selectedMasterclass.description}
+                    </p>
+                  </div>
+                  <div className="relative pt-[52%] bg-black rounded-lg overflow-hidden border border-zinc-800">
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${selectedMasterclass.videoId}?rel=0`}
+                      title={selectedMasterclass.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Coluna Direita (6 cols): Dúvidas Frequentes (FAQ) & Visagismo */}
+              <div className="lg:col-span-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 p-4 flex flex-col justify-between gap-3 overflow-y-auto">
+                <div className="space-y-2.5">
+                  <div>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5" /> Transparência Total
+                    </span>
+                    <h2 className="font-serif text-xl text-zinc-50">
+                      Dúvidas Frequentes antes da sua visita
+                    </h2>
+                  </div>
+
+                  <div className="space-y-2">
+                    {FAQ_LIST.map((item, idx) => {
+                      const isOpen = activeFaqIndex === idx
+                      return (
+                        <div
+                          key={item.q}
+                          className={`rounded-xl border transition-all ${
+                            isOpen
+                              ? 'bg-zinc-950 border-[#D4AF37]/50'
+                              : 'bg-zinc-950/60 border-zinc-800'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setActiveFaqIndex(isOpen ? -1 : idx)}
+                            className="w-full p-3 text-left flex items-center justify-between gap-2 text-xs md:text-sm font-medium text-zinc-100 hover:text-[#D4AF37] cursor-pointer"
+                          >
+                            <span>{item.q}</span>
+                            <span className="font-mono text-xs text-[#D4AF37]">
+                              {isOpen ? '−' : '+'}
+                            </span>
+                          </button>
+                          {isOpen && (
+                            <div className="px-3 pb-3 pt-1 text-xs text-zinc-300 font-light leading-relaxed border-t border-zinc-800/60">
+                              {item.a}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Card de Fechamento Visagismo */}
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#4A3B6B]/25 via-zinc-900 to-[#D4AF37]/15 border border-[#D4AF37]/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-base text-zinc-50">
+                      Pronta para o espelho sorrir de volta pra você?
+                    </h3>
+                    <p className="text-xs text-zinc-300 font-light">
+                      Reserve seu horário com escuta ativa e diagnóstico personalizado.
+                    </p>
+                  </div>
+                  <Link
+                    to="/contato"
+                    className="px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider shrink-0"
+                  >
+                    Agendar Agora
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
-      ))}
+      </div>
 
-      {/* ── Video Gallery ── */}
-      <VideoGallery />
+      {/* ── BARRA INFERIOR DE STATUS CAD (28px Fixa · Zero Scroll) ── */}
+      <footer className="h-7 shrink-0 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+        <div className="flex items-center gap-3 truncate">
+          <span className="text-[#D4AF37] font-semibold">
+            ● ESTAÇÃO ATIVA: {STATIONS.find((s) => s.id === activeStation)?.code}
+          </span>
+          <span className="hidden sm:inline">|</span>
+          <span className="hidden sm:inline">
+            ACERVO NATIVO @drika_hair_santana: 63 POSTS · 36 REELS MP4 · 17 DESTAQUES
+          </span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="hidden md:inline text-zinc-500">
+            REGRA CAD: BOTÕES COM TÍTULO = 1 CLIQUE · BOTÕES SÓ ÍCONE = INSPECIONA FUNÇÃO
+          </span>
+        </div>
+      </footer>
 
-      {/* ── Visagism Impact ── */}
-      <VisagismImpact />
+      {/* ── MODAL DE INSPEÇÃO DE FUNÇÃO PARA BOTÕES DE ÍCONE (<DrikaActionGate />) ── */}
+      <DrikaActionGate
+        action={pendingAction}
+        onConfirm={confirmAction}
+        onCancel={cancelAction}
+        directMode={directMode}
+        onToggleDirectMode={toggleDirectMode}
+      />
 
-      {/* ── Booking CTA ── */}
-      <section className="py-20 px-6 bg-zinc-900/30 border-t border-zinc-900 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="max-w-xl mx-auto"
-        >
-          <h2 className="font-serif text-2xl md:text-4xl text-zinc-50 mb-4 leading-tight">
-            Encontrou o cuidado
-            <br />
-            <span className="text-[#D4AF37] italic">ideal para você?</span>
-          </h2>
-          <p className="text-zinc-400 text-sm font-light mb-8">
-            Reserve seu atendimento agora ou chame a Drika no WhatsApp para bater um papo sincero
-            sobre o seu cabelo.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/contato"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#D4AF37] text-zinc-950 font-semibold text-sm tracking-widest uppercase rounded-sm transition-all duration-300 hover:bg-[#E8C95D] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] active:scale-95"
-            >
-              Agendar Agora
-              <ArrowRight size={16} />
-            </Link>
-            <Link
-              to="/aprenda"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 border border-zinc-700 hover:border-[#D4AF37]/50 text-zinc-300 hover:text-zinc-100 text-sm font-medium rounded-sm transition-all"
-            >
-              <BookOpen size={16} className="text-[#D4AF37]" />
-              Aprender mais nos Guias
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ── Dúvidas Frequentes sobre Serviços ── */}
-      <FAQ className="border-t border-zinc-900 bg-zinc-900/10" />
-
-      {/* ── Masterclasses & Podcasts ── */}
-      <Media />
+      {/* ── MODAIS NATIVOS DE VÍDEO MP4 / FOTO HD E STORIES ── */}
+      <MediaInspectorModal post={inspectedPost} onClose={() => setInspectedPost(null)} />
+      <StoryHighlightModal
+        highlight={inspectedHighlight}
+        onClose={() => setInspectedHighlight(null)}
+      />
     </div>
   )
 }
