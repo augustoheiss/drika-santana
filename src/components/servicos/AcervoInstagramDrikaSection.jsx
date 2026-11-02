@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Play,
@@ -457,7 +457,7 @@ export function ProvasReaisServico({
             key={post.id}
             className="group relative rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 hover:border-[#D4AF37]/50 transition-all flex flex-col"
           >
-            <div className="relative aspect-[4/4] overflow-hidden bg-black">
+            <div className="relative aspect-[4/4] shrink-0 overflow-hidden bg-black">
               <img
                 src={post.image}
                 alt={post.title}
@@ -519,6 +519,8 @@ export function ProvasReaisServico({
   )
 }
 
+const POSTS_PER_PAGE = 12
+
 /**
  * Estação Completa do Acervo Nativo do Instagram (@drika_hair_santana)
  * Pode operar na Estação 03 (Galeria de Reels & Fotos) e na Estação 04 (Stories & Bastidores).
@@ -531,6 +533,8 @@ export default function AcervoInstagramDrikaSection({
 }) {
   const [selectedCategory, setSelectedCategory] = useState('todos')
   const [onlyVideos, setOnlyVideos] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const galleryGridRef = useRef(null)
 
   const filteredPosts = useMemo(() => {
     return DRIKA_INSTAGRAM_POSTS.filter((p) => {
@@ -539,6 +543,38 @@ export default function AcervoInstagramDrikaSection({
       return catOk && vidOk
     })
   }, [selectedCategory, onlyVideos])
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+
+  const paginatedPosts = useMemo(() => {
+    const startIdx = (safeCurrentPage - 1) * POSTS_PER_PAGE
+    return filteredPosts.slice(startIdx, startIdx + POSTS_PER_PAGE)
+  }, [filteredPosts, safeCurrentPage])
+
+  const handlePageChange = (nextPage) => {
+    const clamped = Math.max(1, Math.min(totalPages, nextPage))
+    setCurrentPage(clamped)
+    if (galleryGridRef.current) {
+      galleryGridRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handleCategoryChange = (catId) => {
+    setSelectedCategory(catId)
+    setCurrentPage(1)
+    if (galleryGridRef.current) {
+      galleryGridRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
+
+  const handleToggleOnlyVideos = () => {
+    setOnlyVideos((v) => !v)
+    setCurrentPage(1)
+    if (galleryGridRef.current) {
+      galleryGridRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
 
   if (mode === 'stories') {
     return (
@@ -667,7 +703,7 @@ export default function AcervoInstagramDrikaSection({
         </div>
 
         {/* Grid de Cards dos 17 Destaques (Com Título visível -> Abre direto em 1 clique!) */}
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max content-start gap-3">
           {DRIKA_INSTAGRAM_HIGHLIGHTS.map((hl) => (
             <div
               key={hl.id}
@@ -736,21 +772,24 @@ export default function AcervoInstagramDrikaSection({
     )
   }
 
-  // Modo Padrão: Galeria Filtrável de Transformações, Reels MP4 e Fotos HD
+  const startItemNum = filteredPosts.length === 0 ? 0 : (safeCurrentPage - 1) * POSTS_PER_PAGE + 1
+  const endItemNum = Math.min(safeCurrentPage * POSTS_PER_PAGE, filteredPosts.length)
+
+  // Modo Padrão: Galeria Filtrável e Paginada de Transformações, Reels MP4 e Fotos HD
   return (
-    <div className="h-full flex flex-col gap-3 overflow-hidden">
-      {/* Barra de Filtros e Controles */}
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-zinc-900/60 border border-zinc-800/90 p-2.5 rounded-2xl shrink-0">
+    <div className="h-full flex flex-col gap-2.5 md:gap-3 overflow-hidden">
+      {/* Barra de Filtros e Controles (Compacta no Mobile com scroll horizontal nas categorias) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 bg-zinc-900/60 border border-zinc-800/90 p-2 md:p-2.5 rounded-2xl shrink-0">
         {/* Botões de Categoria COM Título (1 Clique Direto) */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 lg:pb-0 lg:flex-wrap">
           {DRIKA_ARCHIVE_CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id
             return (
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                   isSelected
                     ? 'bg-[#D4AF37] text-zinc-950 font-semibold shadow-[0_0_20px_rgba(212,175,55,0.25)]'
                     : 'bg-zinc-950/90 text-zinc-300 border border-zinc-800 hover:border-[#D4AF37]/40'
@@ -769,62 +808,75 @@ export default function AcervoInstagramDrikaSection({
           })}
         </div>
 
-        {/* Controles à direita: Filtro de Vídeos MP4 + Ícone de Inspeção */}
-        <div className="flex items-center gap-2">
+        {/* Controles à direita: Filtro de Vídeos MP4 + Indicador Rápido de Página + Ícone de Inspeção */}
+        <div className="flex items-center justify-between lg:justify-end gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => setOnlyVideos((v) => !v)}
+            onClick={handleToggleOnlyVideos}
             className={`px-3 py-1.5 rounded-xl text-xs font-mono uppercase tracking-wider border transition-all cursor-pointer flex items-center gap-1.5 ${
               onlyVideos
-                ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]'
-                : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                ? 'bg-[#D4AF37] border-[#D4AF37] text-zinc-950 font-bold shadow-[0_0_20px_rgba(212,175,55,0.25)]'
+                : 'bg-zinc-950 border-zinc-800 text-[#D4AF37] hover:border-[#D4AF37]/50'
             }`}
           >
             <Film className="w-3.5 h-3.5" />
             <span>Reels MP4 ({DRIKA_INSTAGRAM_PROFILE.extractedVideosCount})</span>
           </button>
 
-          {/* Botão SÓ DE ÍCONE: Manifesto Fixado da Drika */}
-          <DrikaCadIconButton
-            size="sm"
-            variant="gold-outline"
-            ariaLabel="Inspecionar vídeo manifesto fixado da Drika"
-            icon={<Pin className="w-3.5 h-3.5" />}
-            onClick={() => {
-              const pinned = DRIKA_INSTAGRAM_POSTS.find((p) => p.isPinned) || DRIKA_INSTAGRAM_POSTS[0]
-              onRequestIconAction?.({
-                code: 'IG-PINNED-REEL',
-                category: 'Vídeo Manifesto Fixado',
-                title: pinned.title,
-                description: pinned.technicalSummary,
-                drikaTip: 'Este é o vídeo principal fixado no topo do Instagram @drika_hair_santana.',
-                previewImage: pinned.image,
-                badge: 'REEL MP4 NATIVO',
-                destination: 'Player de Vídeo em Tela Cheia',
-                confirmLabel: 'Assistir Manifesto da Drika',
-                onConfirm: () => onSelectPost?.(pinned),
-              })
-            }}
-          />
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-block font-mono text-[10px] text-zinc-400 bg-zinc-950/80 border border-zinc-800 px-2.5 py-1 rounded-lg">
+              Pág. <strong className="text-[#D4AF37]">{safeCurrentPage}</strong>/{totalPages}
+            </span>
+
+            {/* Botão SÓ DE ÍCONE: Manifesto Fixado da Drika */}
+            <DrikaCadIconButton
+              size="sm"
+              variant="gold-outline"
+              ariaLabel="Inspecionar vídeo manifesto fixado da Drika"
+              icon={<Pin className="w-3.5 h-3.5" />}
+              onClick={() => {
+                const pinned = DRIKA_INSTAGRAM_POSTS.find((p) => p.isPinned) || DRIKA_INSTAGRAM_POSTS[0]
+                onRequestIconAction?.({
+                  code: 'IG-PINNED-REEL',
+                  category: 'Vídeo Manifesto Fixado',
+                  title: pinned.title,
+                  description: pinned.technicalSummary,
+                  drikaTip: 'Este é o vídeo principal fixado no topo do Instagram @drika_hair_santana.',
+                  previewImage: pinned.image,
+                  badge: 'REEL MP4 NATIVO',
+                  destination: 'Player de Vídeo em Tela Cheia',
+                  confirmLabel: 'Assistir Manifesto da Drika',
+                  onConfirm: () => onSelectPost?.(pinned),
+                })
+              }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Grid Rolável Interno de Transformações Nativas */}
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {filteredPosts.map((post) => (
+      {/* Grid Rolável Interno de Transformações Nativas (Cards amplos com Tease + Botão bem visível) */}
+      <div
+        ref={galleryGridRef}
+        className="flex-1 min-h-0 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max content-start gap-3"
+      >
+        {paginatedPosts.map((post) => (
           <div
             key={post.id}
-            className="group rounded-2xl overflow-hidden border border-zinc-800/90 bg-zinc-900/50 hover:border-[#D4AF37]/50 transition-all flex flex-col justify-between"
+            className="group rounded-2xl overflow-hidden border border-zinc-800/90 bg-zinc-900/60 hover:border-[#D4AF37]/60 transition-all flex flex-col justify-between shadow-md"
           >
-            <div className="relative aspect-[4/4.3] bg-black overflow-hidden">
+            {/* Teaser Visual do Post / Reel (Altura garantida com shrink-0 para nunca achatar) */}
+            <div
+              onClick={() => onSelectPost?.(post)}
+              className="relative h-36 sm:h-36 xl:h-38 shrink-0 bg-black overflow-hidden cursor-pointer"
+            >
               <img
                 src={post.image}
                 alt={post.title}
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/15 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
 
               {/* Badges Superiores */}
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
@@ -850,8 +902,20 @@ export default function AcervoInstagramDrikaSection({
                 )}
               </div>
 
+              {/* Play Centralizado nos Reels para facilitar toque imediato no Mobile e Desktop */}
+              {post.hasLocalVideo && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="w-10 h-10 rounded-full bg-zinc-950/80 border border-[#D4AF37]/80 text-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-zinc-950 flex items-center justify-center shadow-[0_0_25px_rgba(0,0,0,0.8)] transition-all">
+                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                  </span>
+                </div>
+              )}
+
               {/* Botões SÓ DE ÍCONE no canto superior direito (Acionam <DrikaActionGate />!) */}
-              <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+              <div
+                className="absolute top-2.5 right-2.5 flex items-center gap-1.5"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <DrikaCadIconButton
                   size="sm"
                   variant="gold-outline"
@@ -875,37 +939,105 @@ export default function AcervoInstagramDrikaSection({
               </div>
 
               {/* Data e Categoria na base da foto */}
-              <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono text-zinc-300">
-                <span className="text-[#D4AF37]">{post.categoryLabel}</span>
-                <span>{post.dateBR}</span>
+              <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono text-zinc-200">
+                <span className="text-[#D4AF37] font-semibold truncate mr-2">{post.categoryLabel}</span>
+                <span className="shrink-0">{post.dateBR}</span>
               </div>
             </div>
 
-            {/* Corpo clicável COM Título (1 clique direto sem modal de confirmação!) */}
-            <div className="p-3 flex-1 flex flex-col justify-between gap-2.5">
+            {/* Corpo clicável COM Título, Tease do Instagram e Botão Amplo (1 clique direto!) */}
+            <div className="p-3 shrink-0 flex flex-col justify-between gap-2.5">
               <div>
                 <h3 className="font-serif text-sm text-zinc-100 line-clamp-2 leading-snug group-hover:text-[#D4AF37] transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-[11px] text-zinc-400 font-light line-clamp-2 mt-1">
+                <p className="text-[11px] text-zinc-300 font-light line-clamp-2 mt-1 leading-relaxed">
                   {post.technicalSummary}
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-zinc-800/70 flex items-center gap-2">
+              <div className="pt-2 border-t border-zinc-800/80 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onSelectPost?.(post)}
-                  className="flex-1 py-1.5 px-3 rounded-xl bg-zinc-950 hover:bg-[#D4AF37] text-zinc-200 hover:text-zinc-950 border border-zinc-800 hover:border-[#D4AF37] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    post.hasLocalVideo
+                      ? 'bg-[#D4AF37]/15 hover:bg-[#D4AF37] text-[#D4AF37] hover:text-zinc-950 border border-[#D4AF37]/50 hover:border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.12)]'
+                      : 'bg-zinc-950 hover:bg-[#D4AF37] text-zinc-100 hover:text-zinc-950 border border-zinc-700 hover:border-[#D4AF37]'
+                  }`}
                 >
-                  <Play className="w-3 h-3" />
-                  <span>{post.hasLocalVideo ? 'Assistir Reel' : 'Ver Detalhes'}</span>
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{post.hasLocalVideo ? 'Assistir Reel MP4' : 'Ver Transformação'}</span>
                 </button>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Barra Interativa de Paginação (1 Clique Direto nos Botões com Título/Número) */}
+      {totalPages > 1 && (
+        <div className="bg-zinc-900/80 border border-zinc-800/90 px-3 py-2 rounded-2xl shrink-0 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-300">
+            <span className="text-[#D4AF37] font-semibold">
+              Página {safeCurrentPage} de {totalPages}
+            </span>
+            <span className="hidden sm:inline text-zinc-500">•</span>
+            <span className="hidden sm:inline text-zinc-400">
+              Exibindo {startItemNum}–{endItemNum} de {filteredPosts.length} publicações
+              {onlyVideos ? ' (Reels MP4)' : ''}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full">
+            <button
+              type="button"
+              onClick={() => handlePageChange(safeCurrentPage - 1)}
+              disabled={safeCurrentPage <= 1}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all flex items-center gap-1 shrink-0 ${
+                safeCurrentPage <= 1
+                  ? 'bg-zinc-950/40 border-zinc-800/60 text-zinc-600 cursor-not-allowed'
+                  : 'bg-zinc-950 border-zinc-800 text-zinc-200 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] cursor-pointer'
+              }`}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Anterior</span>
+            </button>
+
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
+              const isCurrent = pageNum === safeCurrentPage
+              return (
+                <button
+                  key={`page-${pageNum}`}
+                  type="button"
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`min-w-[32px] px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold border transition-all shrink-0 cursor-pointer ${
+                    isCurrent
+                      ? 'bg-[#D4AF37] text-zinc-950 border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.3)]'
+                      : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-[#D4AF37]/50 hover:text-[#D4AF37]'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            })}
+
+            <button
+              type="button"
+              onClick={() => handlePageChange(safeCurrentPage + 1)}
+              disabled={safeCurrentPage >= totalPages}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all flex items-center gap-1 shrink-0 ${
+                safeCurrentPage >= totalPages
+                  ? 'bg-zinc-950/40 border-zinc-800/60 text-zinc-600 cursor-not-allowed'
+                  : 'bg-zinc-950 border-zinc-800 text-zinc-200 hover:border-[#D4AF37]/50 hover:text-[#D4AF37] cursor-pointer'
+              }`}
+            >
+              <span>Próxima</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
