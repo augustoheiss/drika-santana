@@ -4,12 +4,10 @@ import {
   Sparkles,
   Scissors,
   Clock,
-  RefreshCw,
   ArrowRight,
   BookOpen,
   Coffee,
   Film,
-  Layers,
   GraduationCap,
   HelpCircle,
   Pin,
@@ -21,19 +19,19 @@ import {
   Mic,
   Eye,
   CheckCircle2,
-  UserCheck,
-  Wand2,
+  FlaskConical,
+  Lightbulb,
 } from 'lucide-react'
 import Seo from '../components/Seo'
 import {
   SERVICE_CATEGORIES,
   SERVICES_CATALOG,
   COFFEE_CHAT_SCENARIOS,
+  buildWhatsAppUrl,
 } from '../config/servicesCatalog'
 import {
   DRIKA_INSTAGRAM_PROFILE,
   DRIKA_INSTAGRAM_POSTS,
-  DRIKA_INSTAGRAM_HIGHLIGHTS,
 } from '../data/instagramDrikaArchive'
 import DrikaActionGate, {
   useDrikaActionGate,
@@ -112,7 +110,7 @@ const STATIONS = [
     fullTitle: 'Bancada de Serviços & Visagismo (9 Procedimentos)',
     description:
       'Explore as 4 categorias do Studio (Cabelo, Barba, Rosto e Unhas), inspecione a ficha técnica de cada procedimento e veja as provas reais extraídas do Instagram da Drika.',
-    drikaTip: 'Cada serviço exibe fotos e Reels reais de clientes atendidas pela Drika.',
+    drikaTip: 'Cada serviço exibe o Papo de Café da Drika, a Ciência sem Enrolação e os Reels reais daquele procedimento.',
     icon: Scissors,
     badge: '9',
   },
@@ -144,7 +142,7 @@ const STATIONS = [
     shortTitle: 'Bússola Papo de Café',
     fullTitle: 'Bússola "Papo de Café" — Diagnóstico de Visagismo em 4 Cenários',
     description:
-      'Ainda não sabe o nome técnico do que procura? Escolha como você quer se sentir ao olhar no espelho e descubra a recomendação da Drika.',
+      'Ainda não sabe o nome técnico do que procura? Escolha como você se sente hoje ao olhar no espelho e veja a resposta sincera da Drika.',
     drikaTip: 'Ideal para quem quer mudar o visual com segurança e praticidade na rotina.',
     icon: Coffee,
     badge: '4',
@@ -190,6 +188,7 @@ export default function Servicos() {
 
   // Estado da Estação 04 (Bússola Papo de Café)
   const [activeScenarioId, setActiveScenarioId] = useState(COFFEE_CHAT_SCENARIOS[0].id)
+  const [activeScenarioServiceIdx, setActiveScenarioServiceIdx] = useState(0)
 
   // Estado da Estação 05 (Masterclasses & FAQ)
   const [activeMasterclassId, setActiveMasterclassId] = useState(MASTERCLASSES[0].id)
@@ -227,17 +226,32 @@ export default function Servicos() {
     [activeServiceId, servicesInActiveCategory]
   )
 
+  const selectedCategoryObj = useMemo(
+    () =>
+      SERVICE_CATEGORIES.find((c) => c.id === selectedService.categoryId) ||
+      SERVICE_CATEGORIES[0],
+    [selectedService]
+  )
+
   const selectedScenario = useMemo(
     () =>
       COFFEE_CHAT_SCENARIOS.find((c) => c.id === activeScenarioId) || COFFEE_CHAT_SCENARIOS[0],
     [activeScenarioId]
   )
 
-  const scenarioRecommendedService = useMemo(
+  const scenarioRecommendedServices = useMemo(() => {
+    const ids = selectedScenario.recommendedServiceIds || ['corte']
+    return ids
+      .map((id) => SERVICES_CATALOG.find((s) => s.id === id))
+      .filter(Boolean)
+  }, [selectedScenario])
+
+  const scenarioPrimaryService = useMemo(
     () =>
-      SERVICES_CATALOG.find((s) => s.id === selectedScenario.recommendedServiceId) ||
+      scenarioRecommendedServices[activeScenarioServiceIdx] ||
+      scenarioRecommendedServices[0] ||
       SERVICES_CATALOG[0],
-    [selectedScenario]
+    [scenarioRecommendedServices, activeScenarioServiceIdx]
   )
 
   const selectedMasterclass = useMemo(
@@ -249,6 +263,11 @@ export default function Servicos() {
     setActiveCategoryId(catId)
     const firstSrv = SERVICES_CATALOG.find((s) => s.categoryId === catId)
     if (firstSrv) setActiveServiceId(firstSrv.id)
+  }
+
+  const handleScenarioSelect = (scenarioId) => {
+    setActiveScenarioId(scenarioId)
+    setActiveScenarioServiceIdx(0)
   }
 
   return (
@@ -491,7 +510,7 @@ export default function Servicos() {
                 </div>
 
                 <span className="hidden md:inline-block font-mono text-[11px] text-zinc-400">
-                  Selecione um procedimento à esquerda para inspecionar sua ciência e provas reais
+                  {selectedCategoryObj.headline} — clique em qualquer serviço abaixo
                 </span>
               </div>
 
@@ -518,18 +537,18 @@ export default function Servicos() {
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <span className="px-2 py-0.5 rounded bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] font-mono text-[9px] uppercase tracking-wider">
-                              {srv.badge}
+                              {srv.shortLabel}
                             </span>
                             <span className="font-mono text-[10px] text-zinc-400 flex items-center gap-1">
                               <Clock className="w-3 h-3 text-[#D4AF37]" />
-                              {srv.duracao}
+                              {srv.duration}
                             </span>
                           </div>
                           <h3 className="font-serif text-base text-zinc-50 leading-snug">
                             {srv.title}
                           </h3>
                           <p className="text-xs text-zinc-400 font-light mt-0.5 line-clamp-2">
-                            {srv.subtitle}
+                            {srv.description}
                           </p>
                         </button>
 
@@ -542,10 +561,10 @@ export default function Servicos() {
                           onClick={() =>
                             requestIconAction({
                               code: `SRV-${srv.id.toUpperCase()}`,
-                              category: srv.badge,
-                              title: `${srv.title} — ${srv.subtitle}`,
-                              description: srv.oQueFaz,
-                              drikaTip: `Tempo médio na cadeira: ${srv.duracao} | Manutenção recomendada: ${srv.manutencao}.`,
+                              category: srv.shortLabel,
+                              title: srv.title,
+                              description: srv.description,
+                              drikaTip: srv.cienciaSemEnrolacao,
                               destination: 'Ficha Técnica & Provas Reais na Bancada',
                               confirmLabel: 'Abrir Procedimento na Bancada',
                               onConfirm: () => setActiveServiceId(srv.id),
@@ -576,7 +595,7 @@ export default function Servicos() {
                               : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
                           }`}
                         >
-                          {srv.shortTitle}
+                          {srv.shortLabel}
                         </button>
                       ))}
                     </div>
@@ -591,28 +610,24 @@ export default function Servicos() {
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] font-mono text-[10px] uppercase tracking-widest font-semibold">
-                            {selectedService.badge}
+                            {selectedCategoryObj.label} · {selectedService.shortLabel}
                           </span>
                           <span className="px-2.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[10px] flex items-center gap-1">
                             <Clock className="w-3 h-3 text-[#D4AF37]" />
-                            Duração: {selectedService.duracao}
-                          </span>
-                          <span className="px-2.5 py-0.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[10px] flex items-center gap-1">
-                            <RefreshCw className="w-3 h-3 text-[#D4AF37]" />
-                            Manutenção: {selectedService.manutencao}
+                            Tempo na cadeira: {selectedService.duration}
                           </span>
                         </div>
                         <h2 className="font-serif text-2xl md:text-3xl text-zinc-50">
-                          {selectedService.title}{' '}
-                          <span className="text-[#D4AF37] italic text-xl">
-                            · {selectedService.subtitle}
-                          </span>
+                          {selectedService.title}
                         </h2>
+                        <p className="text-xs md:text-sm text-zinc-400 font-light mt-1">
+                          {selectedService.description}
+                        </p>
                       </div>
 
                       {/* Botões SÓ DE ÍCONE de Ação Rápida do Serviço */}
                       <div className="flex items-center gap-2">
-                        {selectedService.guiaSlug && (
+                        {selectedService.relatedGuideId && (
                           <DrikaCadIconButton
                             variant="gold-outline"
                             ariaLabel={`Inspecionar guia educativo sobre ${selectedService.title}`}
@@ -621,13 +636,15 @@ export default function Servicos() {
                               requestIconAction({
                                 code: `GUIA-${selectedService.id.toUpperCase()}`,
                                 category: 'Educação & Ciência Capilar',
-                                title: `Abrir Guia Educativo: ${selectedService.title}`,
+                                title:
+                                  selectedService.relatedGuideLabel ||
+                                  `Abrir Guia: ${selectedService.title}`,
                                 description:
                                   'Acessa a biblioteca "Aprenda com a Drika" com a explicação passo a passo sobre como cuidar do seu fio antes e depois deste procedimento.',
-                                destination: `/aprenda?guia=${selectedService.guiaSlug}`,
+                                destination: `/aprenda?guia=${selectedService.relatedGuideId}`,
                                 confirmLabel: 'Ir para o Guia Completo',
                                 onConfirm: () =>
-                                  navigate(`/aprenda?guia=${selectedService.guiaSlug}`),
+                                  navigate(`/aprenda?guia=${selectedService.relatedGuideId}`),
                               })
                             }
                           />
@@ -641,7 +658,7 @@ export default function Servicos() {
                               code: `BOOK-${selectedService.id.toUpperCase()}`,
                               category: 'Reserva de Horário Exclusivo',
                               title: `Agendar ${selectedService.title}`,
-                              description: `Abre a agenda inteligente da Drika com o procedimento "${selectedService.title}" (${selectedService.duracao}) já pré-selecionado para você.`,
+                              description: `Abre a agenda inteligente da Drika com o procedimento "${selectedService.title}" (${selectedService.duration}) já pré-selecionado para você.`,
                               destination: `/contato?servico=${selectedService.id}`,
                               confirmLabel: 'Ir para Agendamento',
                               onConfirm: () => navigate(`/contato?servico=${selectedService.id}`),
@@ -651,23 +668,32 @@ export default function Servicos() {
                       </div>
                     </div>
 
-                    {/* Duas Caixas Explicativas: O Que Faz & Para Quem É */}
+                    {/* Três Caixas Explicativas Reais: Papo de Café, Ciência sem Enrolação e Dica de Preparo */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
+                      <div className="p-3.5 rounded-xl bg-zinc-950/90 border border-[#D4AF37]/30 space-y-1.5 md:col-span-2">
                         <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold flex items-center gap-1.5">
-                          <Wand2 className="w-3.5 h-3.5" /> O Que Este Procedimento Faz
+                          <Coffee className="w-3.5 h-3.5" /> Papo de Café com a Drika
                         </span>
-                        <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
-                          {selectedService.oQueFaz}
+                        <p className="text-xs md:text-sm text-zinc-200 font-light italic leading-relaxed">
+                          "{selectedService.papoDeCafe}"
                         </p>
                       </div>
 
                       <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
                         <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold flex items-center gap-1.5">
-                          <UserCheck className="w-3.5 h-3.5" /> Para Quem É Indicado
+                          <FlaskConical className="w-3.5 h-3.5" /> Ciência sem Enrolação
                         </span>
-                        <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
-                          {selectedService.paraQuem}
+                        <p className="text-xs text-zinc-300 font-light leading-relaxed">
+                          {selectedService.cienciaSemEnrolacao}
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 space-y-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold flex items-center gap-1.5">
+                          <Lightbulb className="w-3.5 h-3.5" /> Como Vir Preparada(o)
+                        </span>
+                        <p className="text-xs text-zinc-300 font-light leading-relaxed">
+                          {selectedService.prepTip}
                         </p>
                       </div>
                     </div>
@@ -689,18 +715,30 @@ export default function Servicos() {
                         to={`/contato?servico=${selectedService.id}`}
                         className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 shadow-[0_0_25px_rgba(212,175,55,0.25)] transition-all"
                       >
-                        <span>Agendar {selectedService.shortTitle}</span>
+                        <span>Agendar {selectedService.shortLabel}</span>
                         <ArrowRight className="w-4 h-4" />
                       </Link>
 
-                      {selectedService.guiaSlug && (
+                      {selectedService.relatedGuideId && (
                         <Link
-                          to={`/aprenda?guia=${selectedService.guiaSlug}`}
+                          to={`/aprenda?guia=${selectedService.relatedGuideId}`}
                           className="px-4 py-2.5 rounded-xl border border-zinc-700 hover:border-[#D4AF37]/50 text-zinc-300 hover:text-[#D4AF37] text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-colors"
                         >
                           <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
-                          <span>Ler Guia Completo</span>
+                          <span>{selectedService.relatedGuideLabel || 'Ler Guia Completo'}</span>
                         </Link>
+                      )}
+
+                      {selectedService.whatsappQuestion && (
+                        <a
+                          href={buildWhatsAppUrl(selectedService.whatsappQuestion)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2.5 rounded-xl border border-zinc-800 hover:border-[#D4AF37]/40 text-zinc-300 hover:text-[#D4AF37] text-xs font-mono uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>Tirar Dúvida no WhatsApp</span>
+                        </a>
                       )}
                     </div>
 
@@ -754,7 +792,7 @@ export default function Servicos() {
                     <Coffee className="w-3.5 h-3.5" /> Diagnóstico Interativo
                   </span>
                   <h2 className="font-serif text-xl text-zinc-50 mt-1">
-                    Me conta: como você quer se sentir ao olhar no espelho?
+                    Me conta: qual dessas frases mais parece com o seu momento hoje?
                   </h2>
                 </div>
 
@@ -772,14 +810,17 @@ export default function Servicos() {
                       {/* Botão COM Título -> Seleciona cenário em 1 clique! */}
                       <button
                         type="button"
-                        onClick={() => setActiveScenarioId(sc.id)}
+                        onClick={() => handleScenarioSelect(sc.id)}
                         className="flex-1 text-left cursor-pointer"
                       >
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37]">
-                          Cenário 0{idx + 1} · {sc.tag}
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
+                          <span>{sc.emoji}</span>
+                          <span>
+                            Cenário 0{idx + 1} · {sc.shortTag}
+                          </span>
                         </span>
                         <h3 className="font-serif text-base text-zinc-100 mt-1 leading-snug">
-                          {sc.question}
+                          "{sc.clientQuote}"
                         </h3>
                       </button>
 
@@ -787,18 +828,18 @@ export default function Servicos() {
                       <DrikaCadIconButton
                         size="sm"
                         active={isSelected}
-                        ariaLabel={`Inspecionar recomendação do cenário ${sc.tag}`}
+                        ariaLabel={`Inspecionar recomendação do cenário ${sc.shortTag}`}
                         icon={<Sparkles className="w-3.5 h-3.5" />}
                         onClick={() =>
                           requestIconAction({
                             code: `CAFE-0${idx + 1}`,
-                            category: `Cenário · ${sc.tag}`,
-                            title: sc.question,
-                            description: sc.empathyText,
-                            drikaTip: `Procedimento principal recomendado: ${scenarioRecommendedService.title}.`,
+                            category: `Cenário · ${sc.shortTag}`,
+                            title: sc.clientQuote,
+                            description: sc.drikaCoffeeReply,
+                            drikaTip: sc.sciencePill,
                             destination: 'Diagnóstico da Bússola Papo de Café',
                             confirmLabel: 'Ver Recomendação da Drika',
-                            onConfirm: () => setActiveScenarioId(sc.id),
+                            onConfirm: () => handleScenarioSelect(sc.id),
                           })
                         }
                       />
@@ -807,66 +848,124 @@ export default function Servicos() {
                 })}
               </div>
 
-              {/* Coluna Direita: Resposta da Drika + Serviço Recomendado + Provas Reais */}
+              {/* Coluna Direita: Resposta da Drika + Ciência + Serviços Recomendados + Provas Reais */}
               <div className="lg:col-span-7 rounded-2xl bg-zinc-900/50 border border-zinc-800 p-4 md:p-5 overflow-y-auto flex flex-col justify-between gap-4">
                 <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 space-y-2">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">
-                      Resposta da Drika para Você:
-                    </span>
-                    <p className="font-serif text-base md:text-lg text-zinc-100 italic leading-relaxed">
-                      "{selectedScenario.empathyText}"
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-zinc-950/90 border border-zinc-800 space-y-2">
+                  {/* Resposta da Drika e Pílula da Ciência */}
+                  <div className="p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37]">
-                        Caminho Recomendado:
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold flex items-center gap-1.5">
+                        <Coffee className="w-3.5 h-3.5" /> Resposta da Drika para Você ({selectedScenario.shortTag}):
                       </span>
-                      <span className="font-mono text-xs text-zinc-400">
-                        {scenarioRecommendedService.duracao}
-                      </span>
+                      <span className="text-base">{selectedScenario.emoji}</span>
                     </div>
-                    <h3 className="font-serif text-2xl text-zinc-50">
-                      {scenarioRecommendedService.title}{' '}
-                      <span className="text-[#D4AF37] italic text-lg">
-                        ({scenarioRecommendedService.subtitle})
-                      </span>
-                    </h3>
-                    <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
-                      {scenarioRecommendedService.oQueFaz}
+                    <p className="font-serif text-base md:text-lg text-zinc-100 italic leading-relaxed">
+                      "{selectedScenario.drikaCoffeeReply}"
                     </p>
+                    {selectedScenario.sciencePill && (
+                      <div className="pt-2.5 border-t border-[#D4AF37]/20 flex items-start gap-2 text-xs text-zinc-300 font-light leading-relaxed">
+                        <FlaskConical className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
+                        <span>{selectedScenario.sciencePill}</span>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Seletor dos Serviços Recomendados para este Cenário */}
+                  <div className="p-4 rounded-2xl bg-zinc-950/90 border border-zinc-800 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Procedimentos Recomendados ({scenarioRecommendedServices.length}):
+                      </span>
+
+                      {scenarioRecommendedServices.length > 1 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {scenarioRecommendedServices.map((srv, idx) => (
+                            <button
+                              key={srv.id}
+                              type="button"
+                              onClick={() => setActiveScenarioServiceIdx(idx)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer border ${
+                                activeScenarioServiceIdx === idx
+                                  ? 'bg-[#D4AF37] text-zinc-950 border-[#D4AF37] font-bold'
+                                  : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-[#D4AF37]/40'
+                              }`}
+                            >
+                              {srv.shortLabel}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-serif text-xl md:text-2xl text-zinc-50">
+                          {scenarioPrimaryService.title}
+                        </h3>
+                        <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 font-mono text-[10px] text-[#D4AF37]">
+                          {scenarioPrimaryService.duration}
+                        </span>
+                      </div>
+                      <p className="text-xs md:text-sm text-zinc-300 font-light leading-relaxed">
+                        {scenarioPrimaryService.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Provas Reais no Instagram para o Serviço Recomendado */}
                   <ProvasReaisServico
-                    serviceId={scenarioRecommendedService.id}
-                    serviceTitle={scenarioRecommendedService.title}
+                    serviceId={scenarioPrimaryService.id}
+                    serviceTitle={scenarioPrimaryService.title}
                     onSelectPost={(post) => setInspectedPost(post)}
                     onSelectHighlight={(hl) => setInspectedHighlight(hl)}
                     onRequestIconAction={requestIconAction}
                   />
                 </div>
 
+                {/* CTAs do Cenário (Botões COM Título = 1 Clique Direto) */}
                 <div className="pt-3 border-t border-zinc-800 flex flex-wrap items-center gap-2.5">
                   <Link
-                    to={`/contato?servico=${scenarioRecommendedService.id}`}
-                    className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2"
+                    to={`/contato?servico=${scenarioPrimaryService.id}`}
+                    className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#E8C95D] text-zinc-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 shadow-[0_0_25px_rgba(212,175,55,0.25)]"
                   >
-                    <span>Agendar {scenarioRecommendedService.shortTitle}</span>
+                    <span>Agendar {scenarioPrimaryService.shortLabel}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
+
                   <button
                     type="button"
                     onClick={() => {
-                      setActiveCategoryId(scenarioRecommendedService.categoryId)
-                      setActiveServiceId(scenarioRecommendedService.id)
+                      setActiveCategoryId(scenarioPrimaryService.categoryId)
+                      setActiveServiceId(scenarioPrimaryService.id)
                       setActiveStation('servicos')
                     }}
                     className="px-4 py-2.5 rounded-xl border border-zinc-700 hover:border-[#D4AF37]/50 text-zinc-200 text-xs font-semibold uppercase tracking-wider cursor-pointer"
                   >
-                    Abrir na Bancada de Serviços
+                    Abrir Ficha na Bancada
                   </button>
+
+                  {selectedScenario.recommendedGuideId && (
+                    <Link
+                      to={`/aprenda?guia=${selectedScenario.recommendedGuideId}`}
+                      className="px-3.5 py-2.5 rounded-xl border border-zinc-800 hover:border-[#D4AF37]/40 text-zinc-300 hover:text-[#D4AF37] text-xs font-mono uppercase tracking-wider inline-flex items-center gap-1.5"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Guia Educativo</span>
+                    </Link>
+                  )}
+
+                  {selectedScenario.whatsappPrefill && (
+                    <a
+                      href={buildWhatsAppUrl(selectedScenario.whatsappPrefill)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2.5 rounded-xl border border-zinc-800 hover:border-[#D4AF37]/40 text-zinc-300 hover:text-[#D4AF37] text-xs font-mono uppercase tracking-wider inline-flex items-center gap-1.5"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Conversar no WhatsApp</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
